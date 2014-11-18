@@ -1,7 +1,8 @@
 #include <cstdlib>
 #include <GL/freeglut.h>
 #include "../include/Planet.h"
-
+#include <stdio.h>
+#include "../include/Planet_Info.h"
 void OpenGLInit( void );
 void Animate( void );
 void ResizeWindow( int w, int h );
@@ -12,8 +13,9 @@ GLenum singleStep = GL_FALSE;
 float HourOfDay = 0.0;
 float DayOfYear = 0.0;
 float AnimateIncrement = 24.0;  // animation time step (hours)
+#define NUM_PLANETS 8
 
-
+Planet * planets[NUM_PLANETS];
 // Animate() handles the animation and the redrawing of the graphics window contents.
 void Animate( void )
 {
@@ -102,6 +104,16 @@ void ResizeWindow( int w, int h )
 // Set up OpenGL, hook up callbacks, and start the main loop
 int main( int argc, char** argv )
 {
+    FILE * in = fopen("planet_info.inf","r");
+    Planet_Info info;
+    for(int i = 0; i < NUM_PLANETS; i++)
+    {
+        fscanf(in,"%s,%Lg,%Lg,%Lg,%Lg,%Lg,%Lg,%lg,%lg,%lg,%s",
+                info.name,&info.r,&info.o_r,&info.th,&info.o_v,&info.r_s,&info.t,&info.color[0],&info.color[1],&info.color[2],info.texture);
+        planets[i] = new Planet(info);
+    }
+    fclose(in);
+        
     // Need to double buffer for animation
     glutInit( &argc, argv );
     glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
@@ -109,14 +121,10 @@ int main( int argc, char** argv )
     // Create and position the graphics window
     glutInitWindowPosition( 0, 0 );
     glutInitWindowSize( 600, 360 );
-    glutCreateWindow( "Solar System Demo" );
+    glutCreateWindow( "Solar System" );
 
     // Initialize OpenGL.
     OpenGLInit();
-
-    // Set up callback functions for key presses
-    glutKeyboardFunc( KeyPressFunc );
-    glutSpecialFunc( SpecialKeyFunc );
 
     // Set up the callback function for resizing windows
     glutReshapeFunc( ResizeWindow );
