@@ -21,7 +21,7 @@ class Planet
             char texture_name[1024];
             char planet_name[128];
             double x, y, z;           
-}
+};
 
 
 #endif
