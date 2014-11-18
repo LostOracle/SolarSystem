@@ -1,50 +1,10 @@
-/*
-* orbit.cpp
-*
-* Program to demonstrate how to use a local
-* coordinate method to position parts of a
-* model in relation to other model parts.
-*
-* Draws a simple solar system, with a sun, planet and moon.
-* Based on sample code from the OpenGL programming guide
-* by Woo, Neider, Davis.  Addison-Wesley.
-*
-* Author: Samuel R. Buss
-*
-* Software accompanying the book
-* 3D Computer Graphics: A Mathematical Introduction with OpenGL,
-* by S. Buss, Cambridge University Press, 2003.
-*
-* Software is "as-is" and carries no warranty.  It may be used without
-* restriction, but if you modify it, please change the filenames to
-* prevent confusion between different versions.
-*
-* Bug reports: Sam Buss, sbuss@ucsd.edu.
-* Web page: http://math.ucsd.edu/~sbuss/MathCG
-*
-* USAGE:
-*    Press "r" key to toggle (off and on) running the animation
-*    Press "s" key to single-step animation
-*    The up and down array keys control the time step used in the animation rate.
-*    Each key press multiplies or divides the times by a factor of two.
-*    Press ESCAPE to exit.
-*/
-
-// JMW: Minor modifications for CSC433/533 Computer Graphics, Fall 2014.
-
 #include <cstdlib>
 #include <GL/freeglut.h>
+#include "../include/Planet.h"
 
-// function prototypes
 void OpenGLInit( void );
 void Animate( void );
-void Key_r( void );
-void Key_s( void );
-void Key_up( void );
-void Key_down( void );
 void ResizeWindow( int w, int h );
-void KeyPressFunc( unsigned char Key, int x, int y );
-void SpecialKeyFunc( int Key, int x, int y );
 
 // global variables
 GLenum spinMode = GL_TRUE;
@@ -53,71 +13,6 @@ float HourOfDay = 0.0;
 float DayOfYear = 0.0;
 float AnimateIncrement = 24.0;  // animation time step (hours)
 
-// glutKeyboardFunc is called to set this function to handle normal key presses
-void KeyPressFunc( unsigned char Key, int x, int y )
-{
-    switch ( Key )
-    {
-        case 'R':
-        case 'r':
-            Key_r();
-            break;
-        case 's':
-        case 'S':
-            Key_s();
-            break;
-        case 27:    // Escape key
-            exit( 1 );
-    }
-}
-
-// glutSpecialFunc is called to set this function to handle all special key presses
-// (see glut.h for names of special keys)
-void SpecialKeyFunc( int Key, int x, int y )
-{
-    switch ( Key )
-    {
-        case GLUT_KEY_UP:
-            Key_up();
-            break;
-        case GLUT_KEY_DOWN:
-            Key_down();
-            break;
-    }
-}
-
-// restart animation
-void Key_r( void )
-{
-    if ( singleStep )	// restart animation
-    {
-        singleStep = GL_FALSE;
-        spinMode = GL_TRUE;     
-    }
-    else				// toggle animation on and off
-    {
-        spinMode = !spinMode;   
-    }
-}
-
-// single step animation
-void Key_s( void )
-{
-    singleStep = GL_TRUE;
-    spinMode = GL_TRUE;
-}
-
-// animation speed
-void Key_up( void )
-{
-    AnimateIncrement *= 2.0;            // double the animation time step
-}
-
-// animation speed
-void Key_down( void )
-{
-    AnimateIncrement /= 2.0;            // halve the animation time step
-}
 
 // Animate() handles the animation and the redrawing of the graphics window contents.
 void Animate( void )

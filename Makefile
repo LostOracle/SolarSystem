@@ -33,10 +33,10 @@ VPATH = src
 # MAKE allows the use of "wildcards", to make writing compilation instructions
 # a bit easier. GNU make uses $@ for the target and $^ for the dependencies.
 
-all:    fractal
+all:    solar
 
 # specific targets
-fractal:	generator.o initiator.o common_functions.o main.o fractal_display.o
+solar:	orbit.o
 	$(LINK) -o $@ $^ $(GL_LIBS)
 
 # generic C and C++ targets for OpenGL programs consisting of only one file
