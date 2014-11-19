@@ -3,6 +3,7 @@
 #include "../include/Planet.h"
 #include <stdio.h>
 #include "../include/Planet_Info.h"
+
 void OpenGLInit( void );
 void Animate( void );
 void ResizeWindow( int w, int h );

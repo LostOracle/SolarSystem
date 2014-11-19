@@ -1,5 +1,5 @@
-#define PLANET_H
 #ifndef PLANET_H
+#define PLANET_H
 #include "Planet_Info.h"
 #include <string.h>
 class Planet
@@ -8,7 +8,7 @@ class Planet
            // Planet(const char* planet_name, double planet_radius, double orbital_radius, 
            //        double theta, double orbital_velocity, double rotation_speed, double tilt, 
            //       const double* color, const char* file_name );
-            Planet(Planet_Info info);
+            Planet(Planet_Info &info);
             ~Planet();
 
             double r;

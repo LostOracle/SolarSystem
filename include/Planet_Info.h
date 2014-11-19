@@ -1,5 +1,5 @@
-#define PLANET_INFO_H
 #ifndef PLANET_INFO_H
+#define PLANET_INFO_H
 
 struct Planet_Info
 {
