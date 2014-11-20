@@ -3,7 +3,7 @@
 #include "../include/Planet.h"
 #include <stdio.h>
 #include "../include/Planet_Info.h"
-
+#include "../include/shared_constants.h"
 void OpenGLInit( void );
 void Animate( void );
 void ResizeWindow( int w, int h );
@@ -14,7 +14,6 @@ GLenum singleStep = GL_FALSE;
 float HourOfDay = 0.0;
 float DayOfYear = 0.0;
 float AnimateIncrement = 24.0;  // animation time step (hours)
-#define NUM_PLANETS 8
 
 Planet * planets[NUM_PLANETS];
 // Animate() handles the animation and the redrawing of the graphics window contents.
