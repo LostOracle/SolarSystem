@@ -22,54 +22,10 @@ void Animate( void )
     // Clear the redering window
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-    if ( spinMode )
+    for(int i = 0; i < NUM_PLANETS; i++)
     {
-        // Update the animation state
-        HourOfDay += AnimateIncrement;
-        DayOfYear += AnimateIncrement / 24.0;
-
-        HourOfDay = HourOfDay - ( ( int ) ( HourOfDay / 24 ) ) * 24;
-        DayOfYear = DayOfYear - ( ( int ) ( DayOfYear / 365 ) ) * 365;
+        planets[i].animate();
     }
-
-    // Clear the current matrix (Modelview)
-    glLoadIdentity();
-
-    // Back off eight units to be able to view from the origin.
-    glTranslatef ( 0.0, 0.0, -8.0 );
-
-    // Rotate the plane of the elliptic
-    // (rotate the model's plane about the x axis by fifteen degrees)
-    glRotatef( 15.0, 1.0, 0.0, 0.0 );
-
-    // Draw the sun -- as a yellow, wireframe sphere
-    glColor3f( 1.0, 1.0, 0.0 );
-    glutWireSphere( 1.0, 15, 15 );
-
-    // Draw the Earth
-    // First position it around the sun. Use DayOfYear to determine its position.
-    glRotatef( 360.0 * DayOfYear / 365.0, 0.0, 1.0, 0.0 );
-    glTranslatef( 4.0, 0.0, 0.0 );
-    glPushMatrix();                     // Save matrix state
-    // Second, rotate the earth on its axis. Use HourOfDay to determine its rotation.
-    glRotatef( 360.0 * HourOfDay / 24.0, 0.0, 1.0, 0.0 );
-    // Third, draw the earth as a wireframe sphere.
-    glColor3f( 0.2, 0.2, 1.0 );
-    glutWireSphere( 0.4, 10, 10 );
-    glPopMatrix();                      // Restore matrix state
-
-    // Draw the moon. Use DayOfYear to control its rotation around the earth
-    glRotatef( 360.0 * 12.0 * DayOfYear / 365.0, 0.0, 1.0, 0.0 );
-    glTranslatef( 0.7, 0.0, 0.0 );
-    glColor3f( 0.3, 0.7, 0.3 );
-    glutWireSphere( 0.1, 5, 5 );
-
-    // Flush the pipeline, and swap the buffers
-    glFlush();
-    glutSwapBuffers();
-
-    if ( singleStep ) spinMode = GL_FALSE;
-
     glutPostRedisplay();        // Request a re-draw for animation purposes
 }
 
