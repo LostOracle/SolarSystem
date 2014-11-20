@@ -8,6 +8,7 @@ struct Planet_Info
     long double o_r;
     long double th;
     long double o_v;
+    long double phi;
     long double r_s;
     long double t;
     double color[3]; 
