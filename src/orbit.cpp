@@ -64,8 +64,8 @@ int main( int argc, char** argv )
     Planet_Info info;
     for(int i = 0; i < NUM_PLANETS; i++)
     {
-        fscanf(in,"%s,%Lg,%Lg,%Lg,%Lg,%Lg,%Lg,%lg,%lg,%lg,%s",
-                info.name,&info.r,&info.o_r,&info.th,&info.o_v,&info.r_s,&info.t,&info.color[0],&info.color[1],&info.color[2],info.texture);
+        fscanf(in,"%s,%Lg,%Lg,%Lg,%Lg,%Lg,%Lg,%Lg,%lg,%lg,%lg,%s",
+                info.name,&info.r,&info.o_r,&info.th,&info.o_v,&info.phi,&info.r_s,&info.t,&info.color[0],&info.color[1],&info.color[2],info.texture);
         planets[i] = new Planet(info);
     }
     fclose(in);
@@ -81,7 +81,7 @@ int main( int argc, char** argv )
 
     // Initialize OpenGL.
     OpenGLInit();
-
+    glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
     // Set up the callback function for resizing windows
     glutReshapeFunc( ResizeWindow );
 
@@ -90,6 +90,7 @@ int main( int argc, char** argv )
 
     // Start the main loop.  glutMainLoop never returns.
     glutMainLoop( );
-
+    for(int i = 0; i < NUM_PLANETS; i++)
+        delete planets[i];
     return 0;
 }
