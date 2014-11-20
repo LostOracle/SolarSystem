@@ -21,7 +21,12 @@ void Animate( void )
 {
     // Clear the redering window
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-
+    
+    glLoadIdentity();
+    glTranslatef(0.0, 0.0, -15000.0);
+    glRotatef(15.0, 1.0, 0.0, 0.0);
+    glColor3f(1.0,1.0,0.0);
+    glutWireSphere(696000.0/1000.0, 50, 50);
     for(int i = 0; i < NUM_PLANETS; i++)
     {
         planets[i]->animate();
@@ -52,7 +57,7 @@ void ResizeWindow( int w, int h )
     // Set up the projection view matrix (not very well!)
     glMatrixMode( GL_PROJECTION );
     glLoadIdentity();
-    gluPerspective( 60.0, aspectRatio, 1.0, 30.0 );
+    gluPerspective( 30.0, aspectRatio, 0.0, 8000.0 );
 
     // Select the Modelview matrix
     glMatrixMode( GL_MODELVIEW );
