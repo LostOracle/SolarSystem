@@ -24,7 +24,7 @@ void Animate( void )
 
     for(int i = 0; i < NUM_PLANETS; i++)
     {
-        planets[i].animate();
+        planets[i]->animate();
     }
     glutPostRedisplay();        // Request a re-draw for animation purposes
 }
