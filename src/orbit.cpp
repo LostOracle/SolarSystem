@@ -26,6 +26,8 @@ void Animate( void )
     {
         planets[i]->animate();
     }
+    glFlush();
+    glSwapBuffers();
     glutPostRedisplay();        // Request a re-draw for animation purposes
 }
 
