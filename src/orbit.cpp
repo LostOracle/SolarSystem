@@ -23,6 +23,7 @@ void Animate( void )
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     
     glLoadIdentity();
+    gluLookAt(0,0,0,0,0,-1,1,1,0);
     glTranslatef(0.0, 0.0, -1000000.0);
     glRotatef(15.0, 1.0, 0.0, 0.0);
     glColor3f(1.0,1.0,0.0);
