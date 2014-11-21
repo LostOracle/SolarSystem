@@ -4,6 +4,10 @@
 #include <stdio.h>
 #include "../include/Planet_Info.h"
 #include "../include/shared_constants.h"
+#include <iostream>
+#include <math.h>
+
+using namespace std;
 void OpenGLInit( void );
 void Animate( void );
 void ResizeWindow( int w, int h );
@@ -16,7 +20,54 @@ float DayOfYear = 0.0;
 float AnimateIncrement = 24.0;  // animation time step (hours)
 
 Planet * planets[NUM_PLANETS];
+
+struct camera_position
+{
+    double ey_x,ey_y,ey_z;
+    double at_x,at_y,at_z;
+    double up_x,up_y,up_z;
+    double lf_x,lf_y,lf_z;
+}CameraPos;
+
+struct camera_velocity
+{
+    double x,y,z;
+    double th_x,th_y,th_z;
+}CameraVel;
+
+const double camera_translate_coeff = 1;
+const double camera_rotate_coeff = 1;
 // Animate() handles the animation and the redrawing of the graphics window contents.
+void keyboard( unsigned char key, int x, int y );
+void keyboardUp( unsigned char key, int x, int y );
+void rotate_about_axis3(double &x, double &y, double &z, 
+                        double x_hat, double y_hat, double z_hat, double rads);
+void rotate_camera_pitch(double amount);
+void rotate_camera_roll(double amount);
+void rotate_camera_yaw(double amount);
+int ScreenWidth  = 600;
+int ScreenHeight = 600;
+
+void init_camera()
+{
+    CameraPos.ey_x = 0;
+    CameraPos.ey_y = 0;
+    CameraPos.ey_z = 0;
+    CameraPos.at_x = 0;
+    CameraPos.at_y = 0;
+    CameraPos.at_z = -1;
+    CameraPos.lf_x = -1;
+    CameraPos.lf_y = 0;
+    CameraPos.lf_z = 0;
+
+    CameraVel.x = 0;
+    CameraVel.y = 0;
+    CameraVel.z = 0;
+    CameraVel.th_x = 0;
+    CameraVel.th_y = 0;
+    CameraVel.th_z = 0;
+}
+
 void Animate( void )
 {
     // Clear the redering window
@@ -39,6 +90,120 @@ void Animate( void )
     glutPostRedisplay();        // Request a re-draw for animation purposes
 }
 
+/******************************************************************************
+* Function: keyboardUp( unsigned char key, int x, int y )
+* Authors: Ian Carlson, Christopher Smith
+* Description: Handles the regular keys
+* Arguments:
+*   key: code of the key that was pressed
+*   x: x coordinate the key was pressed at
+*   y: y coordinate the key was pressed at
+* ****************************************************************************/
+void keyboardUp(unsigned char key, int x, int y)
+{
+    // correct for upside-down screen coordinates
+    y = ScreenHeight - y;
+    cerr << "keyrelease: " << key << " (" << int( key ) << ") at (" << x << "," << y << ")\n";
+    switch(key)
+    {
+        case 'a':
+        case 'A':
+    //        camera_vel.x += 100;
+            break;
+        case 'd':
+        case 'D':
+    //        camera_vel.x -= 100;
+            break;
+        case 'w':
+        case 'W':   
+    //        camera_vel.
+            break;
+    }
+}
+/******************************************************************************
+* Function: keyboard( unsigned chart key, int x, int y )
+* Authors: Ian Carlson, Christopher Smith
+* Description: Handles the normal key presses for pong
+* Arguments:
+*   key: code of the key that was pressed
+*   x: x coordinate the key was pressed at
+*   y: y coordinate the key was pressed at
+* ****************************************************************************/
+
+// callback function that tells OpenGL how to handle keystrokes
+void keyboard( unsigned char key, int x, int y )
+{
+    // correct for upside-down screen coordinates
+    y = ScreenHeight - y;
+    cerr << "keypress: " << key << " (" << int( key ) << ") at (" << x << "," << y << ")\n";
+    switch(key)
+    {
+    //    case 'a':
+    }
+
+}
+
+//when the user wants to rotate left/right, we rotate
+//about the up vector, updating the left and at
+//vectors
+void rotate_camera_yaw(double amount)
+{
+    //rotate at and left about up by amount*camera_rotate_coeff
+    rotate_about_axis3(CameraPos.at_x, CameraPos.at_y, CameraPos.at_z,
+                       CameraPos.up_x,CameraPos.up_y,CameraPos.up_z,
+                       amount*camera_rotate_coeff);
+    rotate_about_axis3(CameraPos.lf_x, CameraPos.lf_y, CameraPos.lf_z,
+                       CameraPos.up_x,CameraPos.up_y,CameraPos.up_z,
+                       amount*camera_rotate_coeff);
+}
+
+void rotate_camera_pitch(double amount)
+{
+    //rotate at and up about left by amount*camera_rotate_coeff
+    rotate_about_axis3(CameraPos.at_x, CameraPos.at_y, CameraPos.at_z,
+                       CameraPos.lf_x,CameraPos.lf_y,CameraPos.lf_z,
+                       amount*camera_rotate_coeff);
+    rotate_about_axis3(CameraPos.up_x, CameraPos.up_y, CameraPos.up_z,
+                       CameraPos.lf_x,CameraPos.lf_y,CameraPos.lf_z,
+                       amount*camera_rotate_coeff);
+}
+
+void rotate_camera_roll(double amount)
+{
+    //rotate up and left about at by amount*camera_rotate_coeff
+    rotate_about_axis3(CameraPos.lf_x, CameraPos.lf_y, CameraPos.lf_z,
+                       CameraPos.at_x,CameraPos.at_y,CameraPos.at_z,
+                       amount*camera_rotate_coeff);
+    rotate_about_axis3(CameraPos.up_x, CameraPos.up_y, CameraPos.up_z,
+                       CameraPos.at_x,CameraPos.at_y,CameraPos.at_z,
+                       amount*camera_rotate_coeff);
+}
+void rotate_about_axis3(double &x, double &y, double &z, 
+                        double x_hat, double y_hat, double z_hat, double rads)
+{
+    //http://en.wikipedia.org/wiki/Rotation_matrix#Rotation_matrix_from_axis_and_angle
+    double new_x, new_y, new_z;
+    //don't need to do this a bunch of times
+    double c = cos(rads);
+    double s = sin(rads);
+
+    new_x = x*(c + x_hat*x_hat*(1-c))
+      + y*(x_hat*y_hat*(1-c) - z_hat*s)
+      + z*(x_hat*z_hat*(1-c) + y_hat*s);
+
+    new_y = x*(y_hat*x_hat*(1-c) + z_hat*s)
+      + y*(c + y_hat*y_hat*(1-c))
+      + z*(y_hat*z_hat*(1-c) - x_hat*s);
+
+    new_z = x*(z_hat*x_hat*(1-c) - y_hat*s)
+      + y*(z_hat*y_hat*(1-c) + x_hat*s)
+      + z*(c + z_hat*z_hat*(1-c));
+
+    x = new_x;
+    y = new_y;
+    z = new_z;
+}
+
 // Initialize OpenGL's rendering modes
 void OpenGLInit( void )
 {
@@ -46,12 +211,16 @@ void OpenGLInit( void )
     glClearColor( 0.0, 0.0, 0.0, 0.0 );
     glClearDepth( 1.0 );
     glEnable( GL_DEPTH_TEST );
+    glutKeyboardFunc( keyboard );
+    glutKeyboardUpFunc( keyboardUp);
 }
 
 // ResizeWindow is called when the window is resized
 void ResizeWindow( int w, int h )
 {
     float aspectRatio;
+    ScreenWidth = w;
+    ScreenHeight = h;
     h = ( h == 0 ) ? 1 : h;
     w = ( w == 0 ) ? 1 : w;
     glViewport( 0, 0, w, h );   // View port uses whole window
