@@ -42,7 +42,7 @@ void Planet::animate( )
     // Draw the Planet
     // First position it around the sun. Use DayOfYear to determine its position.
     glRotatef( theta, 0.0, 1.0, 0.0 );
-    glTranslatef( orbital_r/1000.0, 0.0, -1000.0 );
+    glTranslatef( orbital_r, 0.0,-1000.0 );
     // Second, rotate the planet on its axis. 
     glRotatef( phi, 0.0, 1.0, 0.0 );   
     draw_mode = 0;

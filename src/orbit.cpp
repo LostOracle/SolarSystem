@@ -23,10 +23,12 @@ void Animate( void )
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     
     glLoadIdentity();
-    glTranslatef(0.0, 0.0, -15000.0);
+    glTranslatef(0.0, 0.0, -1000000.0);
     glRotatef(15.0, 1.0, 0.0, 0.0);
     glColor3f(1.0,1.0,0.0);
-    glutWireSphere(696000.0/1000.0, 50, 50);
+    glutWireSphere(6960, 50, 50);
+    glTranslatef(100000,0,0);
+    glutWireSphere( 2439,50,50);
     for(int i = 0; i < NUM_PLANETS; i++)
     {
         planets[i]->animate();
