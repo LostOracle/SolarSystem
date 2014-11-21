@@ -59,7 +59,7 @@ void ResizeWindow( int w, int h )
     // Set up the projection view matrix (not very well!)
     glMatrixMode( GL_PROJECTION );
     glLoadIdentity();
-    gluPerspective( 30.0, aspectRatio, 0.0, 8000.0 );
+    gluPerspective( 30.0, aspectRatio, 0.0, 2000000.0 );
 
     // Select the Modelview matrix
     glMatrixMode( GL_MODELVIEW );
@@ -73,8 +73,11 @@ int main( int argc, char** argv )
     Planet_Info info;
     for(int i = 0; i < NUM_PLANETS; i++)
     {
-        fscanf(in,"%s,%Lg,%Lg,%Lg,%Lg,%Lg,%Lg,%Lg,%lg,%lg,%lg,%s",
+        fscanf(in,"%s %Lg %Lg %Lg %Lg %Lg %Lg %Lg %lf %lf %lf %s",
                 info.name,&info.r,&info.o_r,&info.th,&info.o_v,&info.phi,&info.r_s,&info.t,&info.color[0],&info.color[1],&info.color[2],info.texture);
+        
+       // printf("%s,%Lg,%Lg,%Lg,%Lg,%Lg,%Lg,%Lg,%lf,%lf,%lf,%s\n\n\n",info.name,info.r,info.o_r,info.th,info.o_v,info.phi,info.r_s,info.t,info.color[0],info.color[1],info.color[2],info.texture);
+
         planets[i] = new Planet(info);
     }
     fclose(in);

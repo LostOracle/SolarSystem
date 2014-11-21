@@ -41,6 +41,8 @@ void Planet::animate( )
     glLoadIdentity(); 
     // Draw the Planet
     // First position it around the sun. Use DayOfYear to determine its position.
+    glTranslatef(0.0, 0.0, -10000.0);
+    glRotatef(15.0, 1.0, 0.0, 0.0);
     glRotatef( theta, 0.0, 1.0, 0.0 );
     glTranslatef( orbital_r, 0.0,-1000.0 );
     // Second, rotate the planet on its axis. 
@@ -87,7 +89,7 @@ void Planet::animate_wire()
 {
     // Third, draw the earth as a wireframe sphere.
     glColor3f( 1, 1, 1 );
-    glutWireSphere( r/1000.0, 100, 100 );
+    glutWireSphere(r,100,100 );
 }
 void Planet::animate_flat()
 {
