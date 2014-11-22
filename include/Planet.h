@@ -3,6 +3,7 @@
 #include "Planet_Info.h"
 #include <string.h>
 #include <GL/freeglut.h>
+#include <math.h>
 class Planet
 {
     public:
