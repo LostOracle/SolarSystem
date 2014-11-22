@@ -20,6 +20,18 @@ class Planet
 
             static void set_draw_mode(const char &new_draw_mode);
             static char get_draw_mode();
+    
+            //set lighting
+            void set_diffuse(const double &r, const double &g, const double &b);
+            void set_diffuse(const double new_diffuse[]);
+            void set_specular( const double &r, const double &g, const double &b);
+            void set_specular( const double new_specular[]);
+            //get lighting
+            void get_diffuse( double old_diffuse[] );
+            void get_specular( double old_specular[] );
+ 
+    
+    
     private:
 
             static char draw_mode;
@@ -41,6 +53,10 @@ class Planet
             char texture_name[1024];
             char planet_name[128];
             long double x, y, z;                   
+            //Lighting reflections 
+            double diffuse[3];
+            double specular[3];
+
             //animation functions for setting OpenGL variables
             //and draw modes
             void animate_wire();

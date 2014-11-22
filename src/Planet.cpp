@@ -107,6 +107,50 @@ void Planet::animate_texture()
 }
 
 
+void Planet::set_diffuse( const double &r, const double &g, const double &b) 
+{
+    diffuse[0] = r;
+    diffuse[1] = g;
+    diffuse[2] = b;
+}
+
+void Planet::set_diffuse( const double new_diffuse[] )
+{
+    diffuse[0] = new_diffuse[0];
+    diffuse[1] = new_diffuse[1];
+    diffuse[2] = new_diffuse[2];
+}
+
+void Planet::set_specular(const double &r, const double &g, const double &b) 
+{
+ specular[0] = r;
+ specular[1] = g;
+ specular[2] = b;
+}
+
+void Planet::set_specular( const double new_specular[] )
+{
+    specular[0] = new_specular[0];
+    specular[1] = new_specular[1];
+    specular[2] = new_specular[2];
+}
+
+void Planet::get_diffuse(double old_diffuse[] )
+{
+    old_diffuse[0] = diffuse[0];
+    old_diffuse[1] = diffuse[1];
+    old_diffuse[2] = diffuse[2];
+}
+
+void Planet::get_specular( double old_specular[] )
+{
+    old_specular[0] = specular[0];
+    old_specular[1] = speuclar[1];
+    old_specular[2] = specular[2];
+}
+   
+
+
 /*******STATIC VARIABLES FOR CLASS**********/
-long double Planet::time_step = 0;
+long double Planet::time_step = 50;
 char Planet::draw_mode = 0;
