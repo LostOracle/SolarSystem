@@ -36,6 +36,9 @@ void special_keyboard( int key, int x, int y);
 void keyboardUp( unsigned char key, int x, int y );
 void rotate_about_axis3(double &x, double &y, double &z, 
                         double x_hat, double y_hat, double z_hat, double rads);
+void SubMenuHandler( int item );
+void MainMenuHandler( int item );
+void CreateMenus();
 void move_left(double amount);
 void move_up(double amount);
 void move_forward(double amount);
@@ -43,6 +46,8 @@ void rotate_pitch(double amount);
 void rotate_roll(double amount);
 void rotate_yaw(double amount);
 void click( int button, int state, int x, int y );
+void displaySubMenuHandler( int item );
+void jumpToSubMenuHandler( int item );
 int ScreenWidth  = 600;
 int ScreenHeight = 600;
 
@@ -335,6 +340,7 @@ void OpenGLInit( void )
     glutSpecialFunc(special_keyboard);
     glutMouseFunc( click );
     glutMotionFunc( drag );
+    CreateMenus();
 }
 
 // ResizeWindow is called when the window is resized
@@ -398,4 +404,97 @@ int main( int argc, char** argv )
     for(int i = 0; i < NUM_PLANETS; i++)
         delete planets[i];
     return 0;
+}
+
+// CreateMenus() creates the right mouse button menu
+void CreateMenus()
+{
+    // create submenu
+    int value = 1;
+    int displaySubMenu = glutCreateMenu( displaySubMenuHandler );
+    glutAddMenuEntry( "Wireframe", value++ );
+    glutAddMenuEntry( "Flat Shading", value++ );
+    glutAddMenuEntry( "Smooth Shading", value++ );
+    glutAddMenuEntry( "Textures", value++ );
+
+    value = 1;
+    int jumpToSubMenu = glutCreateMenu(jumpToSubMenuHandler);
+    glutAddMenuEntry( "Sun",value++);
+    glutAddMenuEntry( "Mercury",value++);
+    glutAddMenuEntry( "Venus",value++);
+    glutAddMenuEntry( "Earth",value++);
+    glutAddMenuEntry( "Moon",value++);
+    glutAddMenuEntry( "Mars",value++);
+    glutAddMenuEntry( "Jupiter",value++);
+    glutAddMenuEntry( "Saturn",value++);
+    glutAddMenuEntry( "Uranus",value++);
+    glutAddMenuEntry( "Neptune",value++);
+
+    // create main menu
+    int mainmenu = glutCreateMenu( MainMenuHandler );
+    cout << "mainmenu id = " << mainmenu << endl;
+    glutAddSubMenu("Display Method",displaySubMenu);
+    glutAddSubMenu("Jump To",jumpToSubMenu);    
+
+    // right button click activates menu
+    glutAttachMenu( GLUT_RIGHT_BUTTON );
+}
+
+// MainMenuHandler() controls the main menu
+// only action is to print selected menu entry
+void MainMenuHandler( int item )
+{
+    switch ( item )
+    {
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+        case 9:
+        case 10:
+            cout << "you selected main menu item " << item << endl;
+            break;
+        default:    // should not occur
+            cout << "invalid main menu item " << item << endl;
+            break;
+    }
+}
+
+void displaySubMenuHandler( int item )
+{
+    switch ( item )
+    {
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+            cout << "you selected submenu item " << item << endl;
+            break;
+        break;
+        default:    // should not occur
+            cout << "invalid submenu item " << item << endl;
+            break;
+    }   
+}
+
+// SubMenuHandler() controls the submenu
+// only action is to print selected submenu entry
+void jumpToSubMenuHandler( int item )
+{
+    switch ( item )
+    {
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+            cout << "you selected submenu item " << item << endl;
+            break;
+        default:    // should not occur
+            cout << "invalid submenu item " << item << endl;
+            break;
+    }
 }
