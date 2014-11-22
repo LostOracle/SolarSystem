@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "../include/Planet_Info.h"
 #include "../include/shared_constants.h"
+#include "../include/Camera_Structs.h"
 #include <iostream>
 #include <math.h>
 
@@ -23,19 +24,9 @@ float AnimateIncrement = 24.0;  // animation time step (hours)
 
 Planet * planets[NUM_PLANETS];
 
-struct camera_position
-{
-    double ey_x,ey_y,ey_z;
-    double at_x,at_y,at_z;
-    double up_x,up_y,up_z;
-    double lf_x,lf_y,lf_z;
-}CameraPos;
+camera_position CameraPos;
 
-struct camera_velocity
-{
-    double x,y,z;
-    double th_x,th_y,th_z;
-}CameraVel;
+camera_velocity CameraVel;
 
 const double camera_translate_coeff = 1;
 const double camera_rotate_coeff = 1;
@@ -87,17 +78,18 @@ void Animate( void )
     gluLookAt(CameraPos.ey_x,CameraPos.ey_y,CameraPos.ey_z,
               CameraPos.at_x,CameraPos.at_y,CameraPos.at_z,
               CameraPos.up_x,CameraPos.up_y,CameraPos.up_z);
-    gluLookAt(0,0,0,0,0,-1,1,1,0);
     glTranslatef(0.0, 0.0, -1000000.0);
-    glRotatef(15.0, 1.0, 0.0, 0.0);
+    glRotatef(90.0, 0.0, 0.0, 1.0);
     glColor3f(1.0,1.0,0.0);
     glutWireSphere(6960, 50, 50);
-    glTranslatef(100000,0,0);
-    glutWireSphere( 2439,50,50);
     for(int i = 0; i < NUM_PLANETS; i++)
     {
+        glPushMatrix();
         planets[i]->animate();
+        glPopMatrix();
+
     }
+    glPopMatrix();
     glFlush();
     glutSwapBuffers();
     glutPostRedisplay();        // Request a re-draw for animation purposes

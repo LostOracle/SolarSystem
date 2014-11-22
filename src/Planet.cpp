@@ -38,16 +38,12 @@ void Planet::animate( )
         rotation_s -= 360;
     
     
-    glLoadIdentity(); 
-    gluLookAt(0,0,0,0,0,-1,1,1,0);
     // Draw the Planet
     // First position it around the sun. Use DayOfYear to determine its position.
-    glTranslatef(0.0, 0.0, -10000.0);
-    glRotatef(15.0, 1.0, 0.0, 0.0);
-    glRotatef( theta, 0.0, 1.0, 0.0 );
+    glRotatef( theta, 0.0, 0.0, 1.0 );
     glTranslatef( orbital_r/2.0, 0.0,-1000.0 );
     // Second, rotate the planet on its axis. 
-    glRotatef( phi, 0.0, 1.0, 0.0 );   
+    glRotatef( phi, 0.0, 0.0, 1.0 );   
     draw_mode = 0;
     if( draw_mode == 0)
     {
@@ -145,12 +141,12 @@ void Planet::get_diffuse(double old_diffuse[] )
 void Planet::get_specular( double old_specular[] )
 {
     old_specular[0] = specular[0];
-    old_specular[1] = speuclar[1];
+    old_specular[1] = specular[1];
     old_specular[2] = specular[2];
 }
    
 
 
 /*******STATIC VARIABLES FOR CLASS**********/
-long double Planet::time_step = 50;
+long double Planet::time_step = 200;
 char Planet::draw_mode = 0;
