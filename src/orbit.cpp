@@ -13,6 +13,8 @@ void Animate( void );
 void ResizeWindow( int w, int h );
 
 // global variables
+double last_click_x = -1;
+double last_click_y = -1;
 GLenum spinMode = GL_TRUE;
 GLenum singleStep = GL_FALSE;
 float HourOfDay = 0.0;
@@ -39,12 +41,17 @@ const double camera_translate_coeff = 1;
 const double camera_rotate_coeff = 1;
 // Animate() handles the animation and the redrawing of the graphics window contents.
 void keyboard( unsigned char key, int x, int y );
+void special_keyboard( int key, int x, int y);
 void keyboardUp( unsigned char key, int x, int y );
 void rotate_about_axis3(double &x, double &y, double &z, 
                         double x_hat, double y_hat, double z_hat, double rads);
-void rotate_camera_pitch(double amount);
-void rotate_camera_roll(double amount);
-void rotate_camera_yaw(double amount);
+void move_left(double amount);
+void move_up(double amount);
+void move_forward(double amount);
+void rotate_pitch(double amount);
+void rotate_roll(double amount);
+void rotate_yaw(double amount);
+void click( int button, int state, int x, int y );
 int ScreenWidth  = 600;
 int ScreenHeight = 600;
 
@@ -56,8 +63,11 @@ void init_camera()
     CameraPos.at_x = 0;
     CameraPos.at_y = 0;
     CameraPos.at_z = -1;
-    CameraPos.lf_x = -1;
-    CameraPos.lf_y = 0;
+    CameraPos.up_x = 1;
+    CameraPos.up_y = 0;
+    CameraPos.up_z = 0;
+    CameraPos.lf_x = 0;
+    CameraPos.lf_y = 1;
     CameraPos.lf_z = 0;
 
     CameraVel.x = 0;
@@ -74,6 +84,9 @@ void Animate( void )
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     
     glLoadIdentity();
+    gluLookAt(CameraPos.ey_x,CameraPos.ey_y,CameraPos.ey_z,
+              CameraPos.at_x,CameraPos.at_y,CameraPos.at_z,
+              CameraPos.up_x,CameraPos.up_y,CameraPos.up_z);
     gluLookAt(0,0,0,0,0,-1,1,1,0);
     glTranslatef(0.0, 0.0, -1000000.0);
     glRotatef(15.0, 1.0, 0.0, 0.0);
@@ -106,19 +119,29 @@ void keyboardUp(unsigned char key, int x, int y)
     cerr << "keyrelease: " << key << " (" << int( key ) << ") at (" << x << "," << y << ")\n";
     switch(key)
     {
-        case 'a':
-        case 'A':
-    //        camera_vel.x += 100;
-            break;
-        case 'd':
-        case 'D':
-    //        camera_vel.x -= 100;
-            break;
-        case 'w':
-        case 'W':   
-    //        camera_vel.
-            break;
     }
+}
+
+//When the user clicks, set the position in the last_pos var so we can
+//know where they're going if they drag
+void click( int button, int state, int x, int y )
+{
+    y = ScreenHeight - y;
+    last_click_x = x;
+    last_click_y = y;
+    cerr << "Click at: (" << x << "," << y << ")\n";
+}
+
+void drag(int x, int y)
+{
+    y = ScreenHeight - y;
+    double x_diff = x - last_click_x;
+    double y_diff = y - last_click_y;
+    rotate_pitch(y_diff/100);
+    rotate_yaw(x_diff/100);
+    last_click_x = x;
+    last_click_y = y;
+    cerr << "Drag to: (" << x << "," << y << ")\n";
 }
 /******************************************************************************
 * Function: keyboard( unsigned chart key, int x, int y )
@@ -138,44 +161,148 @@ void keyboard( unsigned char key, int x, int y )
     cerr << "keypress: " << key << " (" << int( key ) << ") at (" << x << "," << y << ")\n";
     switch(key)
     {
-    //    case 'a':
+        case 'a':
+        case 'A':
+            move_left(10000);
+            break;
+        case 'w':
+        case 'W':
+            move_up(10000);
+            break;
+        case 'd':
+        case 'D':
+            move_left(-10000);
+            break;
+        case 's':
+        case 'S':
+            move_up(-10000);
+            break;
+        case 'e':
+        case 'E':
+            rotate_roll(0.2);
+            break;
+        case 'q':
+        case 'Q':
+            rotate_roll(-0.2);
+            break;
     }
 
+}
+
+void special_keyboard( int key, int x, int y)
+{
+    y = ScreenHeight -y;
+    cerr << "Special Keypress: " << key << " (" << int( key ) << ") at (" << x << "," << y << ")\n";
+
+    switch(key)
+    {
+    case GLUT_KEY_PAGE_UP:
+        move_forward(10000);
+        break;
+    case GLUT_KEY_PAGE_DOWN:
+        move_forward(-10000);
+        break;
+    }
+}
+void move_forward(double amount)
+{
+    //at-ey will give the forward-facing vector, but
+    //we need to normalize it to make sure we're to scale
+    double x,y,z;
+    x = CameraPos.at_x - CameraPos.ey_x;
+    y = CameraPos.at_y - CameraPos.ey_y;
+    z = CameraPos.at_z - CameraPos.ey_z;
+    double mag = x*x + y*y + z*z;
+    mag = sqrt(mag);
+    x/=mag;
+    y/=mag;
+    z/=mag;
+    
+    //now that we have a unit vector for the forward
+    //direction, move along that vector
+    CameraPos.at_x += x*amount;
+    CameraPos.at_y += y*amount;
+    CameraPos.at_z += z*amount;
+    CameraPos.ey_x += x*amount;
+    CameraPos.ey_y += y*amount;
+    CameraPos.ey_z += z*amount;
+}
+
+void move_up(double amount)
+{
+    //update at and eye by amount*lf
+    CameraPos.at_x += amount*CameraPos.up_x;
+    CameraPos.at_y += amount*CameraPos.up_y;
+    CameraPos.at_z += amount*CameraPos.up_z;
+    CameraPos.ey_x += amount*CameraPos.up_x;
+    CameraPos.ey_y += amount*CameraPos.up_y;
+    CameraPos.ey_z += amount*CameraPos.up_z;
+}
+
+void move_left(double amount)
+{
+    //update at and eye by amount*lf
+    CameraPos.at_x += amount*CameraPos.lf_x;
+    CameraPos.at_y += amount*CameraPos.lf_y;
+    CameraPos.at_z += amount*CameraPos.lf_z;
+    CameraPos.ey_x += amount*CameraPos.lf_x;
+    CameraPos.ey_y += amount*CameraPos.lf_y;
+    CameraPos.ey_z += amount*CameraPos.lf_z;
 }
 
 //when the user wants to rotate left/right, we rotate
 //about the up vector, updating the left and at
 //vectors
-void rotate_camera_yaw(double amount)
+void rotate_yaw(double amount)
 {
-    //rotate at and left about up by amount*camera_rotate_coeff
-    rotate_about_axis3(CameraPos.at_x, CameraPos.at_y, CameraPos.at_z,
+    //rotate at and up about left by amount*camera_rotate_coeff
+    //extract vector from at - ey
+    double x = CameraPos.at_x - CameraPos.ey_x;
+    double y = CameraPos.at_y - CameraPos.ey_y;
+    double z = CameraPos.at_z - CameraPos.ey_z;
+    rotate_about_axis3(x, y, z,
                        CameraPos.up_x,CameraPos.up_y,CameraPos.up_z,
                        amount*camera_rotate_coeff);
     rotate_about_axis3(CameraPos.lf_x, CameraPos.lf_y, CameraPos.lf_z,
                        CameraPos.up_x,CameraPos.up_y,CameraPos.up_z,
                        amount*camera_rotate_coeff);
+    //reconstruct the actual at from ey + the new vector
+    CameraPos.at_x = CameraPos.ey_x + x;
+    CameraPos.at_y = CameraPos.ey_y + y;
+    CameraPos.at_z = CameraPos.ey_z + z;
 }
 
-void rotate_camera_pitch(double amount)
+void rotate_pitch(double amount)
 {
     //rotate at and up about left by amount*camera_rotate_coeff
-    rotate_about_axis3(CameraPos.at_x, CameraPos.at_y, CameraPos.at_z,
+    //extract vector from at - ey
+    double x = CameraPos.at_x - CameraPos.ey_x;
+    double y = CameraPos.at_y - CameraPos.ey_y;
+    double z = CameraPos.at_z - CameraPos.ey_z;
+    rotate_about_axis3(x, y, z,
                        CameraPos.lf_x,CameraPos.lf_y,CameraPos.lf_z,
                        amount*camera_rotate_coeff);
     rotate_about_axis3(CameraPos.up_x, CameraPos.up_y, CameraPos.up_z,
                        CameraPos.lf_x,CameraPos.lf_y,CameraPos.lf_z,
                        amount*camera_rotate_coeff);
+    //reconstruct the actual at from ey + the new vector
+    CameraPos.at_x = CameraPos.ey_x + x;
+    CameraPos.at_y = CameraPos.ey_y + y;
+    CameraPos.at_z = CameraPos.ey_z + z;
 }
 
-void rotate_camera_roll(double amount)
+void rotate_roll(double amount)
 {
     //rotate up and left about at by amount*camera_rotate_coeff
     rotate_about_axis3(CameraPos.lf_x, CameraPos.lf_y, CameraPos.lf_z,
-                       CameraPos.at_x,CameraPos.at_y,CameraPos.at_z,
+                       CameraPos.at_x-CameraPos.ey_x,
+                       CameraPos.at_y-CameraPos.ey_y,
+                       CameraPos.at_z-CameraPos.ey_z,
                        amount*camera_rotate_coeff);
     rotate_about_axis3(CameraPos.up_x, CameraPos.up_y, CameraPos.up_z,
-                       CameraPos.at_x,CameraPos.at_y,CameraPos.at_z,
+                       CameraPos.at_x-CameraPos.ey_x,
+                       CameraPos.at_y-CameraPos.ey_y,
+                       CameraPos.at_z-CameraPos.ey_z,
                        amount*camera_rotate_coeff);
 }
 void rotate_about_axis3(double &x, double &y, double &z, 
@@ -213,6 +340,9 @@ void OpenGLInit( void )
     glEnable( GL_DEPTH_TEST );
     glutKeyboardFunc( keyboard );
     glutKeyboardUpFunc( keyboardUp);
+    glutSpecialFunc(special_keyboard);
+    glutMouseFunc( click );
+    glutMotionFunc( drag );
 }
 
 // ResizeWindow is called when the window is resized
@@ -229,7 +359,7 @@ void ResizeWindow( int w, int h )
     // Set up the projection view matrix (not very well!)
     glMatrixMode( GL_PROJECTION );
     glLoadIdentity();
-    gluPerspective( 30.0, aspectRatio, 0.0, 2000000.0 );
+    gluPerspective( 30.0, aspectRatio, 0.0, 2000000000.0 );
 
     // Select the Modelview matrix
     glMatrixMode( GL_MODELVIEW );
@@ -241,6 +371,7 @@ int main( int argc, char** argv )
 {
     FILE * in = fopen("planet_info.inf","r");
     Planet_Info info;
+    init_camera();
     for(int i = 0; i < NUM_PLANETS; i++)
     {
         fscanf(in,"%s %Lg %Lg %Lg %Lg %Lg %Lg %Lg %lf %lf %lf %s",
