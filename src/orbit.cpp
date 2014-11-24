@@ -638,19 +638,7 @@ void MainMenuHandler( int item )
 
 void displaySubMenuHandler( int item )
 {
-    switch ( item )
-    {
-        case 1:
-        case 2:
-        case 3:
-        case 4:
-            cout << "you selected submenu item " << item << endl;
-            break;
-        break;
-        default:    // should not occur
-            cout << "invalid submenu item " << item << endl;
-            break;
-    }   
+            Planet::set_draw_mode(item - 1);
 }
 
 // SubMenuHandler() controls the submenu

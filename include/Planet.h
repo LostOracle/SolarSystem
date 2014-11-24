@@ -4,6 +4,13 @@
 #include <string.h>
 #include <GL/freeglut.h>
 #include <math.h>
+#include <stdio.h>
+bool LoadBmpFile( const char* filename, int &NumRows, int &NumCols, unsigned char* &ImagePtr );
+short readShort( FILE* infile );
+int readLong( FILE* infile );
+void skipChars( FILE* infile, int numChars );
+inline int GetNumBytesPerRow( int NumCols );
+
 class Planet
 {
     public:
@@ -39,6 +46,7 @@ class Planet
             long double get_radius();
     private:
 
+            GLUquadricObj* sphere;
             static char draw_mode;
             static long double time_step;
             //planet radius

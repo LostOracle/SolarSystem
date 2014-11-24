@@ -48,8 +48,6 @@ Planet* Planet::add_moon(Planet_Info &info )
     return moons[ allocated_moons - 1 ];
 }
 
-#include <iostream>
-using namespace std;
 void  Planet::get_location( long double &x, long double &y )
 {
     x = 0;
@@ -58,11 +56,8 @@ void  Planet::get_location( long double &x, long double &y )
     {
         char name[1000];
         parent->get_planet_name(name);
-        cout << "Parent: " << name << endl;
         parent -> get_location(x,y);
     }
-    else
-        cout << "No parent" << endl;
     x += (orbital_r*cos(M_PI*theta/180));
     y += (orbital_r*sin(M_PI*theta/180));
 }
@@ -116,6 +111,15 @@ void Planet::draw( )
     {
         animate_texture();
     }
+
+    glPushMatrix();
+    glRotatef( phi, 0, 0, 1 );
+    glTranslatef( 0.0, 0.0, r * 2.0 );
+    glRotatef( 90, 1, 0, 0 );
+    glScalef( 100, 100, 100 );
+    glutStrokeString(GLUT_STROKE_ROMAN, (const unsigned char *)planet_name);
+    glPopMatrix();
+
     glPushMatrix();
     for( int i = 0; i < allocated_moons; i++)
     {
@@ -168,8 +172,31 @@ void Planet::animate_smooth()
 }
 
 void Planet::animate_texture()
-{
+{   
 
+    int nrows, ncols;
+    unsigned char* image;
+    if ( !LoadBmpFile( (char *)texture_name, nrows, ncols, image ) )
+    {
+        return;
+    }
+
+    // Pixel alignment: each row is word aligned (aligned to a 4 byte boundary)
+    // Therefore, no need to call glPixelStore( GL_UNPACK_ALIGNMENT, ... );
+
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+    gluBuild2DMipmaps( GL_TEXTURE_2D, GL_RGB, ncols, nrows, GL_RGB, GL_UNSIGNED_BYTE, image );
+    
+    delete [] image;
+// generate GLU quadric sphere with surface normals and texture coordinates
+    sphere = gluNewQuadric( );
+    gluQuadricDrawStyle( sphere, GLU_FILL );
+    gluQuadricNormals( sphere, GLU_SMOOTH );
+    gluQuadricTexture( sphere, GL_TRUE );
+    gluSphere( sphere, 1, 64, 64 );
 }
 
 
@@ -220,8 +247,130 @@ long double Planet::get_radius()
     return orbital_r;
 }
    
+bool LoadBmpFile( const char* filename, int &NumRows, int &NumCols, unsigned char* &ImagePtr )
+{
+    FILE* infile = fopen( filename, "rb" );     // Open for reading binary data
+    if ( !infile )
+    {
+        fprintf( stderr, "LoadBmpFile(): unable to open file: %s\n", filename );
+        return false;
+    }
+
+    bool fileFormatOK = false;
+    int bChar = fgetc( infile );
+    int mChar = fgetc( infile );
+    if ( bChar == 'B' && mChar == 'M' )
+    {           // If starts with "BM" for "BitMap"
+        skipChars( infile, 4 + 2 + 2 + 4 + 4 );         // Skip 4 fields we don't care about
+        NumCols = readLong( infile );
+        NumRows = readLong( infile );
+        skipChars( infile, 2 );                 // Skip one field
+        int bitsPerPixel = readShort( infile );
+        skipChars( infile, 4 + 4 + 4 + 4 + 4 + 4 );     // Skip 6 more fields
+
+        if ( NumCols > 0 && NumCols <= 100000 && NumRows > 0 && NumRows <= 100000
+                && bitsPerPixel == 24 && !feof( infile ) )
+        {
+            fileFormatOK = true;
+        }
+    }
+
+    if ( !fileFormatOK )
+    {
+        fclose ( infile );
+        fprintf( stderr, "Not a valid 24-bit bitmap file: %s.\n", filename );
+        return false;
+    }
+
+    // Allocate memory
+    ImagePtr = new unsigned char[ NumRows * GetNumBytesPerRow( NumCols ) ];
+    if ( !ImagePtr )
+    {
+        fclose ( infile );
+        fprintf( stderr, "Unable to allocate memory for %i x %i bitmap: %s.\n",
+                 NumRows, NumCols, filename );
+        return false;
+    }
+
+    unsigned char* cPtr = ImagePtr;
+    for ( int i = 0; i < NumRows; i++ )
+    {
+        int j;
+        for ( j = 0; j < NumCols; j++ )
+        {
+            *( cPtr + 2 ) = fgetc( infile );    // Blue color value
+            *( cPtr + 1 ) = fgetc( infile );    // Green color value
+            *cPtr = fgetc( infile );        // Red color value
+            cPtr += 3;
+        }
+        int k = 3 * NumCols;                    // Num bytes already read
+        for ( ; k < GetNumBytesPerRow( NumCols ); k++ )
+        {
+            fgetc( infile );                // Read and ignore padding;
+            *( cPtr++ ) = 0;
+        }
+    }
+
+    if ( feof( infile ) )
+    {
+        fclose ( infile );
+        fprintf( stderr, "Premature end of file: %s.\n", filename );
+        return false;
+    }
+
+    fclose( infile );   // Close the file
+
+    return true;
+}
+// Rows are word aligned
+inline int GetNumBytesPerRow( int NumCols )
+{
+    return ( ( 3 * NumCols + 3 ) >> 2 ) << 2;
+}
 
 
+// read a 16-bit integer from the input file
+short readShort( FILE* infile )
+{
+    unsigned char lowByte, hiByte;
+    lowByte = fgetc( infile );          // Read the low order byte (little endian form)
+    hiByte = fgetc( infile );           // Read the high order byte
+
+    // Pack together
+    short ret = hiByte;
+    ret <<= 8;
+    ret |= lowByte;
+    return ret;
+}
+
+// read a 32-bit integer from the input file
+int readLong( FILE* infile )
+{
+    unsigned char byte0, byte1, byte2, byte3;
+    byte0 = fgetc( infile );            // Read bytes, low order to high order
+    byte1 = fgetc( infile );
+    byte2 = fgetc( infile );
+    byte3 = fgetc( infile );
+
+    // Pack together
+    int ret = byte3;
+    ret <<= 8;
+    ret |= byte2;
+    ret <<= 8;
+    ret |= byte1;
+    ret <<= 8;
+    ret |= byte0;
+    return ret;
+}
+
+// skip over given number of bytes in input file
+void skipChars( FILE* infile, int numChars )
+{
+    for ( int i = 0; i < numChars; i++ )
+    {
+        fgetc( infile );
+    }
+}
 /*******STATIC VARIABLES FOR CLASS**********/
 long double Planet::time_step = 0;
 char Planet::draw_mode = 0;
