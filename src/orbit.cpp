@@ -85,11 +85,15 @@ void Animate( void )
     // Clear the redering window
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
+    //update the positions of the planets
+    for(int i = 0; i < NUM_PLANETS; i++)
+        planets[i]->animate();
+
     //track the target planet, if any
     if(target_lock != NULL)
     {
         long double target_x, target_y;
-        long double vect_x, vect_y, vect_z;
+        long double vect_x, vect_y;
         char name[1000];
         target_lock->get_planet_name(name);
         vect_x = CameraPos.at_x - CameraPos.ey_x;
@@ -104,7 +108,7 @@ void Animate( void )
         CameraPos.ey_y = CameraPos.at_y - vect_y;
     }
 
-    
+    //draw everything, the planets take care of drawing their moons
     glLoadIdentity();
     gluLookAt(CameraPos.ey_x,CameraPos.ey_y,CameraPos.ey_z,
               CameraPos.at_x,CameraPos.at_y,CameraPos.at_z,
@@ -112,7 +116,7 @@ void Animate( void )
     for(int i = 0; i < NUM_PLANETS; i++)
     {
         glPushMatrix();
-        planets[i]->animate();
+        planets[i]->draw();
         glPopMatrix();
 
     }
@@ -203,6 +207,13 @@ void keyboard( unsigned char key, int x, int y )
         case 'q':
         case 'Q':
             rotate_roll(-0.2);
+            break;
+        case '+':
+        case '=':
+            Planet::increment_time_step(10);
+            break;
+        case '-':
+            Planet::increment_time_step(-10);
             break;
     }
 
@@ -455,9 +466,9 @@ void get_planet(Planet * parent, FILE *& in, int planets_index)
     {
         cout << "Adding planet: " << info.name << endl;
         planets[planets_index] = new Planet(info,NULL);
+        all_celestial_bodies.push_back(planets[planets_index]);
         for(int i = 0; i < info.moons; i++)
             get_planet(planets[planets_index],in,0);//the index doesn't matter if the parent * is non null
-        all_celestial_bodies.push_back(planets[planets_index]);
     }
     else
     {
