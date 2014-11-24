@@ -129,6 +129,13 @@ long double Planet::get_time_step()
     return time_step;
 }
 
+void Planet::increment_time_step( const long double &increment )
+{
+    time_step += increment;
+    if( time_step  < 0 )
+        time_step = 0;
+}
+
 void Planet::set_draw_mode( const char &new_draw_mode )
 {
     draw_mode = new_draw_mode;

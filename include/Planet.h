@@ -21,7 +21,7 @@ class Planet
 
             static void set_draw_mode(const char &new_draw_mode);
             static char get_draw_mode();
-    
+            static void increment_time_step( const long double &increment); 
             //set lighting
             void set_diffuse(const double &r, const double &g, const double &b);
             void set_diffuse(const double new_diffuse[]);
