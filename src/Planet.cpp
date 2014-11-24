@@ -67,9 +67,8 @@ void  Planet::get_location( long double &x, long double &y )
     y += (orbital_r*sin(M_PI*theta/180));
 }
 
-void Planet::animate( )
+void Planet::animate()
 {
-
     theta += (orbital_v *time_step);
     while( theta > 360 )
         theta -= 360;
@@ -77,8 +76,14 @@ void Planet::animate( )
     phi += ( rotation_s * time_step );
     while( rotation_s > 360 )
         rotation_s -= 360;
-    
-    
+
+ for( int i = 0; i < allocated_moons; i++ ) 
+    moons[i]->animate();
+
+}
+
+void Planet::draw( )
+{
     // Draw the Planet
     // First position it around the sun. Use DayOfYear to determine its position.
     glColor3f(1,1,1);
@@ -113,7 +118,7 @@ void Planet::animate( )
     glPushMatrix();
     for( int i = 0; i < allocated_moons; i++)
     {
-        moons[i]->animate();
+        moons[i]->draw();
         glPopMatrix();
         glPushMatrix();
     }

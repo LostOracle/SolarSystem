@@ -31,7 +31,7 @@ class Planet
             void get_diffuse( double old_diffuse[] );
             void get_specular( double old_specular[] );
  
-
+            void draw();
             void get_location( long double &x, long double &y);
             void get_planet_name(char * out_str);
             int get_num_moons();
