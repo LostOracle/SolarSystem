@@ -63,8 +63,8 @@ void  Planet::get_location( long double &x, long double &y )
     }
     else
         cout << "No parent" << endl;
-    x += (orbital_r*cos(theta));
-    y += (orbital_r*sin(theta));
+    x += (orbital_r*cos(M_PI*theta/180));
+    y += (orbital_r*sin(M_PI*theta/180));
 }
 
 void Planet::animate( )
