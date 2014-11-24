@@ -21,8 +21,9 @@ GLenum singleStep = GL_FALSE;
 float HourOfDay = 0.0;
 float DayOfYear = 0.0;
 float AnimateIncrement = 24.0;  // animation time step (hours)
+int num_planets;
 
-Planet * planets[NUM_PLANETS];
+Planet ** planets;
 
 camera_position CameraPos;
 
@@ -38,6 +39,7 @@ void rotate_about_axis3(double &x, double &y, double &z,
                         double x_hat, double y_hat, double z_hat, double rads);
 void SubMenuHandler( int item );
 void MainMenuHandler( int item );
+void testSubMenuHandler(int item);
 void CreateMenus();
 void move_left(double amount);
 void move_up(double amount);
@@ -45,6 +47,7 @@ void move_forward(double amount);
 void rotate_pitch(double amount);
 void rotate_roll(double amount);
 void rotate_yaw(double amount);
+void get_planet(Planet * parent, FILE *& in, int planets_index);
 void click( int button, int state, int x, int y );
 void displaySubMenuHandler( int item );
 void jumpToSubMenuHandler( int item );
@@ -373,20 +376,27 @@ void ResizeWindow( int w, int h )
 int main( int argc, char** argv )
 {
     FILE * in = fopen("planet_info.inf","r");
+    if(!in)
+    {
+        cout << "Failed to find planet description file \"planet_info.inf\"" << endl;
+        return 0;
+    }
+    //Get the number of entries in planet_info.inf
+    fscanf(in,"%d",&num_planets);
+
+    //create an array of points to that many objects
+    planets = new Planet*[num_planets];
+
     Planet_Info info;
-    init_camera();
+    
     for(int i = 0; i < NUM_PLANETS; i++)
     {
-        fscanf(in,"%s %Lg %Lg %Lg %Lg %Lg %Lg %Lg %lf %lf %lf %s",
-                info.name,&info.r,&info.o_r,&info.th,&info.o_v,&info.phi,&info.r_s,&info.t,&info.color[0],&info.color[1],&info.color[2],info.texture);
-        
-       // printf("%s,%Lg,%Lg,%Lg,%Lg,%Lg,%Lg,%Lg,%lf,%lf,%lf,%s\n\n\n",info.name,info.r,info.o_r,info.th,info.o_v,info.phi,info.r_s,info.t,info.color[0],info.color[1],info.color[2],info.texture);
-
-        planets[i] = new Planet(info);
+        get_planet(NULL,in,i);
     }
     fclose(in);
         
     // Need to double buffer for animation
+    init_camera();
     glutInit( &argc, argv );
     glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
 
@@ -406,21 +416,50 @@ int main( int argc, char** argv )
 
     // Start the main loop.  glutMainLoop never returns.
     glutMainLoop( );
+
     for(int i = 0; i < NUM_PLANETS; i++)
         delete planets[i];
+    delete []planets;
     return 0;
 }
+
+void get_planet(Planet * parent, FILE *& in, int planets_index)
+{
+
+    Planet_Info info;
+    //read the next line of the file
+    fscanf(in,"%s %Lg %Lg %Lg %Lg %Lg %Lg %Lg %lf %lf %lf %s %d",
+            info.name,&info.r,&info.o_r,&info.th,&info.o_v,&info.phi,&info.r_s,&info.t,&info.color[0],&info.color[1],&info.color[2],info.texture, &info.moons);
+
+    cout << "Adding planet: " << info.name << endl;
+    if(NULL == parent)
+    {
+        planets[planets_index] = new Planet(info);
+    }
+    else
+    {
+        Planet * new_parent = parent->add_moon(info);
+        for(int i = 0; i < info.moons; i++)
+            get_planet(new_parent,in,0);//the index doesn't matter if the parent * is non null
+    }
+}    
 
 // CreateMenus() creates the right mouse button menu
 void CreateMenus()
 {
     // create submenu
     int value = 1;
+
+    int testSubMenu = glutCreateMenu( testSubMenuHandler);
+    glutAddMenuEntry("test1",value++);
+    glutAddMenuEntry("test2",value++);
+
     int displaySubMenu = glutCreateMenu( displaySubMenuHandler );
     glutAddMenuEntry( "Wireframe", value++ );
     glutAddMenuEntry( "Flat Shading", value++ );
     glutAddMenuEntry( "Smooth Shading", value++ );
     glutAddMenuEntry( "Textures", value++ );
+    glutAddSubMenu("test menu",testSubMenu);
 
     value = 1;
     int jumpToSubMenu = glutCreateMenu(jumpToSubMenuHandler);
@@ -443,6 +482,11 @@ void CreateMenus()
 
     // right button click activates menu
     glutAttachMenu( GLUT_RIGHT_BUTTON );
+}
+
+void testSubMenuHandler(int item)
+{
+
 }
 
 // MainMenuHandler() controls the main menu
