@@ -9,7 +9,7 @@
 }
 */
 
-Planet::Planet( Planet_Info &info, Planet* ptr = NULL  ):r(info.r), orbital_r(info.o_r), theta(info.th), orbital_v(info.o_v),phi(info.phi), rotation_s(info.r_s), tilt(info.t), num_moons(info.moons)
+Planet::Planet( Planet_Info &info, Planet* ptr = NULL  ):r(info.r), orbital_r(info.o_r), theta(info.th), orbital_v(info.o_v),phi(info.phi), rotation_s(info.r_s), tilt(info.t), num_moons(info.moons), rings(info.rings)
 {
     int i;
     for( i = 0; i < 3; i++)
@@ -17,6 +17,13 @@ Planet::Planet( Planet_Info &info, Planet* ptr = NULL  ):r(info.r), orbital_r(in
 
     strcpy(texture_name, info.texture);
     strcpy(planet_name, info.name);
+    if( 1 == rings )
+    {
+        inner_r = info.inner_r;
+        outer_r = info.outer_r;
+        strcpy(ring_texture, info.ring_texture);
+    
+    }
     moons = new Planet* [num_moons];
     allocated_moons = 0;
     parent = ptr;
@@ -43,8 +50,10 @@ Planet* Planet::add_moon(Planet_Info &info )
 
 void  Planet::get_location( long double &x, long double &y )
 {
-    if(NULL!= parent)
-        parent->get_location(x,y);
+    x = 0;
+    y = 0;
+    if(NULL !=  parent)
+        parent -> get_location(x,y);
     x += (orbital_r*cos(theta));
     y += (orbital_r*sin(theta));
 }

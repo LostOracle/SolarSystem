@@ -72,6 +72,10 @@ class Planet
             Planet **moons;
             int num_moons;
             int allocated_moons;
+            int rings;
+            long double inner_r;
+            long double outer_r;
+            char ring_texture[1024];
 };
 
 
