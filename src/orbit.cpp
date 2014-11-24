@@ -23,17 +23,25 @@ float HourOfDay = 0.0;
 float DayOfYear = 0.0;
 float AnimateIncrement = 24.0;  // animation time step (hours)
 int num_planets;
+bool left_dragging = false;
 
 Planet ** planets;
 vector<Planet *> all_celestial_bodies;
 Planet * target_lock;
+//Some handy mouse handling constants provided by Dr. Weiss
+const int MouseButtonPress	= 0;
+const int MouseButtonRelease= 1;
+const int MouseLeftButton	= 0;
+const int MouseMiddleButton	= 1; //unused
+const int MouseRightButton	= 2; //unused
 
 camera_position CameraPos;
-
 camera_velocity CameraVel;
+int camera_locked = 1; //start locked on the sun
 
-const double camera_translate_coeff = 100;
-const double camera_rotate_coeff = 1;
+double camera_translate_coeff = 100;
+double camera_rotate_coeff = 1;
+double time_step_coeff = 10;
 // Animate() handles the animation and the redrawing of the graphics window contents.
 void keyboard( unsigned char key, int x, int y );
 void special_keyboard( int key, int x, int y);
@@ -149,14 +157,27 @@ void keyboardUp(unsigned char key, int x, int y)
 //know where they're going if they drag
 void click( int button, int state, int x, int y )
 {
-    y = ScreenHeight - y;
-    last_click_x = x;
-    last_click_y = y;
-    cerr << "Click at: (" << x << "," << y << ")\n";
+    //only for clicks on the left mouse button
+    if(button == MouseLeftButton)
+    {
+        if(state == MouseButtonPress)
+        {
+            y = ScreenHeight - y;
+            last_click_x = x;
+            last_click_y = y;
+            left_dragging = true;
+        }
+        if(state == MouseButtonRelease)
+        {
+            left_dragging = false;
+        }
+    }
 }
 
 void drag(int x, int y)
 {
+    if(!left_dragging)
+        return;
     y = ScreenHeight - y;
     double x_diff = x - last_click_x;
     double y_diff = y - last_click_y;
@@ -186,34 +207,34 @@ void keyboard( unsigned char key, int x, int y )
     {
         case 'a':
         case 'A':
-            move_left(10000);
+            move_left(camera_translate_coeff);
             break;
         case 'w':
         case 'W':
-            move_up(10000);
+            move_up(camera_translate_coeff);
             break;
         case 'd':
         case 'D':
-            move_left(-10000);
+            move_left(-camera_translate_coeff);
             break;
         case 's':
         case 'S':
-            move_up(-10000);
+            move_up(-camera_translate_coeff);
             break;
         case 'e':
         case 'E':
-            rotate_roll(0.2);
+            rotate_roll(camera_rotate_coeff);
             break;
         case 'q':
         case 'Q':
-            rotate_roll(-0.2);
+            rotate_roll(-camera_rotate_coeff);
             break;
         case '+':
         case '=':
-            Planet::increment_time_step(10);
+            Planet::increment_time_step(time_step_coeff);
             break;
         case '-':
-            Planet::increment_time_step(-10);
+            Planet::increment_time_step(-time_step_coeff);
             break;
     }
 
@@ -227,10 +248,10 @@ void special_keyboard( int key, int x, int y)
     switch(key)
     {
     case GLUT_KEY_PAGE_UP:
-        move_forward(10000);
+        move_forward(camera_translate_coeff);
         break;
     case GLUT_KEY_PAGE_DOWN:
-        move_forward(-10000);
+        move_forward(-camera_translate_coeff);
         break;
     }
 }
@@ -285,40 +306,84 @@ void move_left(double amount)
 //vectors
 void rotate_yaw(double amount)
 {
-    //rotate at and up about left by amount*camera_rotate_coeff
-    //extract vector from at - ey
     double x = CameraPos.at_x - CameraPos.ey_x;
     double y = CameraPos.at_y - CameraPos.ey_y;
     double z = CameraPos.at_z - CameraPos.ey_z;
-    rotate_about_axis3(x, y, z,
-                       CameraPos.up_x,CameraPos.up_y,CameraPos.up_z,
-                       amount*camera_rotate_coeff);
-    rotate_about_axis3(CameraPos.lf_x, CameraPos.lf_y, CameraPos.lf_z,
-                       CameraPos.up_x,CameraPos.up_y,CameraPos.up_z,
-                       amount*camera_rotate_coeff);
-    //reconstruct the actual at from ey + the new vector
-    CameraPos.at_x = CameraPos.ey_x + x;
-    CameraPos.at_y = CameraPos.ey_y + y;
-    CameraPos.at_z = CameraPos.ey_z + z;
+    //maintain distance, but move eye left or right
+    if(camera_locked)
+    {
+        //invert the ey to at vector and rotate it around
+        //the vector 0,0,1
+        x=-x;
+        y=-y;
+        z=-z;
+        rotate_about_axis3(x,y,z,
+                           0,0,1,
+                           amount*camera_rotate_coeff);
+
+        //also update the left vector
+        rotate_about_axis3(CameraPos.lf_x, CameraPos.lf_y, CameraPos.lf_z,
+                0,0,1,
+                amount*camera_rotate_coeff);
+        CameraPos.ey_x = CameraPos.at_x + x;
+        CameraPos.ey_y = CameraPos.at_y + y;
+        CameraPos.ey_z = CameraPos.at_z + z;
+    }
+
+    //rotate at and up about left by amount*camera_rotate_coeff
+    //extract vector from at - ey
+    else
+    {
+        rotate_about_axis3(x, y, z,
+                           CameraPos.up_x,CameraPos.up_y,CameraPos.up_z,
+                           amount*camera_rotate_coeff);
+        rotate_about_axis3(CameraPos.lf_x, CameraPos.lf_y, CameraPos.lf_z,
+                           CameraPos.up_x,CameraPos.up_y,CameraPos.up_z,
+                           amount*camera_rotate_coeff);
+        //reconstruct the actual at from ey + the new vector
+        CameraPos.at_x = CameraPos.ey_x + x;
+        CameraPos.at_y = CameraPos.ey_y + y;
+        CameraPos.at_z = CameraPos.ey_z + z;
+    }
 }
 
 void rotate_pitch(double amount)
 {
-    //rotate at and up about left by amount*camera_rotate_coeff
-    //extract vector from at - ey
     double x = CameraPos.at_x - CameraPos.ey_x;
     double y = CameraPos.at_y - CameraPos.ey_y;
     double z = CameraPos.at_z - CameraPos.ey_z;
-    rotate_about_axis3(x, y, z,
-                       CameraPos.lf_x,CameraPos.lf_y,CameraPos.lf_z,
-                       amount*camera_rotate_coeff);
-    rotate_about_axis3(CameraPos.up_x, CameraPos.up_y, CameraPos.up_z,
-                       CameraPos.lf_x,CameraPos.lf_y,CameraPos.lf_z,
-                       amount*camera_rotate_coeff);
-    //reconstruct the actual at from ey + the new vector
-    CameraPos.at_x = CameraPos.ey_x + x;
-    CameraPos.at_y = CameraPos.ey_y + y;
-    CameraPos.at_z = CameraPos.ey_z + z;
+    //invert x,y,z and rotate that vector about lf then move ey
+    if(camera_locked)
+    {
+        rotate_about_axis3(CameraPos.up_x,CameraPos.up_y,CameraPos.up_z,
+                           CameraPos.lf_x,CameraPos.lf_y,CameraPos.lf_z,
+                           amount*camera_rotate_coeff); 
+        x = -x;
+        y = -y;
+        z = -z;
+        rotate_about_axis3(x,y,z,
+                           CameraPos.lf_x,CameraPos.lf_y,CameraPos.lf_z,
+                           amount*camera_rotate_coeff);
+        CameraPos.ey_x = CameraPos.at_x + x;
+        CameraPos.ey_y = CameraPos.at_y + y;
+        CameraPos.ey_z = CameraPos.at_z + z;
+                    
+    }
+    //rotate at and up about left by amount*camera_rotate_coeff
+    //extract vector from at - ey
+    else
+    {
+        rotate_about_axis3(x, y, z,
+                           CameraPos.lf_x,CameraPos.lf_y,CameraPos.lf_z,
+                           amount*camera_rotate_coeff);
+        rotate_about_axis3(CameraPos.up_x, CameraPos.up_y, CameraPos.up_z,
+                           CameraPos.lf_x,CameraPos.lf_y,CameraPos.lf_z,
+                           amount*camera_rotate_coeff);
+        //reconstruct the actual at from ey + the new vector
+        CameraPos.at_x = CameraPos.ey_x + x;
+        CameraPos.at_y = CameraPos.ey_y + y;
+        CameraPos.at_z = CameraPos.ey_z + z;
+    }
 }
 
 void rotate_roll(double amount)
@@ -566,6 +631,7 @@ void jumpToSubMenuHandler( int item )
     char name[1024];
     long double x,y;
     target_lock = all_celestial_bodies[item-1];
+    camera_locked = 1;
     all_celestial_bodies[item-1]->get_location(x,y);
 
     all_celestial_bodies[item-1]->get_planet_name(name);

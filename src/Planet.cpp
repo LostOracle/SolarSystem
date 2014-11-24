@@ -87,7 +87,9 @@ void Planet::draw( )
     // Draw the Planet
     // First position it around the sun. Use DayOfYear to determine its position.
     glColor3f(1,1,1);
-    
+    GLUquadricObj * object;
+    object = gluNewQuadric();
+    gluDisk(object,orbital_r*0.997,orbital_r*1.003,orbital_r*10,10);
     /*glBegin( GL_LINE_STRIP );
         for ( double i = 0.0; i < 200; i++ )
         {
