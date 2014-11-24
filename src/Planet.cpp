@@ -16,6 +16,11 @@ Planet::Planet( Planet_Info &info, Planet* ptr = NULL  ):r(info.r), orbital_r(in
         color[i] = info.color[i];
 
     strcpy(texture_name, info.texture);
+    if ( !LoadBmpFile(texture_name, texture_rows, texture_cols, image ) )
+    {
+        printf("failed to load texture.\n");
+        return;
+    }
     strcpy(planet_name, info.name);
     if( 1 == rings )
     {
@@ -34,6 +39,7 @@ Planet::~Planet()
     for( int i = 0; i < allocated_moons; i++)
         delete moons[i];
     delete []moons;
+    delete []image;
 }
 
 void Planet::get_planet_name(char * out_str)
@@ -88,7 +94,7 @@ void Planet::draw( )
     //the torus draws 90 degrees to everything else for some reason
     glRotatef(90.0,1.0,0.0,0.0);
     glTranslatef(-orbital_r,0.0,0.0);
-    glutWireTorus(orbital_r-200,orbital_r+200,50,1);
+    glutWireTorus(orbital_r-200,orbital_r+200,100,1);
     glPopMatrix();
     glRotatef( theta, 0.0, 0.0, 1.0 );
     glTranslatef( orbital_r, 0.0,0.0 );
@@ -174,29 +180,22 @@ void Planet::animate_smooth()
 void Planet::animate_texture()
 {   
 
-    int nrows, ncols;
-    unsigned char* image;
-    if ( !LoadBmpFile( (char *)texture_name, nrows, ncols, image ) )
-    {
-        return;
-    }
-
+    glEnable(GL_TEXTURE_2D);
     // Pixel alignment: each row is word aligned (aligned to a 4 byte boundary)
     // Therefore, no need to call glPixelStore( GL_UNPACK_ALIGNMENT, ... );
-
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-    gluBuild2DMipmaps( GL_TEXTURE_2D, GL_RGB, ncols, nrows, GL_RGB, GL_UNSIGNED_BYTE, image );
+    gluBuild2DMipmaps( GL_TEXTURE_2D, GL_RGB, texture_cols, texture_rows, GL_RGB, GL_UNSIGNED_BYTE, image );
     
-    delete [] image;
 // generate GLU quadric sphere with surface normals and texture coordinates
     sphere = gluNewQuadric( );
     gluQuadricDrawStyle( sphere, GLU_FILL );
     gluQuadricNormals( sphere, GLU_SMOOTH );
     gluQuadricTexture( sphere, GL_TRUE );
-    gluSphere( sphere, 1, 64, 64 );
+    gluSphere( sphere, this->r, 64, 64 );
+    glDisable(GL_TEXTURE_2D);
 }
 
 
