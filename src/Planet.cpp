@@ -9,7 +9,7 @@
 }
 */
 
-Planet::Planet( Planet_Info &info ):r(info.r), orbital_r(info.o_r), theta(info.th), orbital_v(info.o_v),phi(info.phi), rotation_s(info.r_s), tilt(info.t), num_moons(info.moons)
+Planet::Planet( Planet_Info &info, const Planet* ptr = NULL  ):r(info.r), orbital_r(info.o_r), theta(info.th), orbital_v(info.o_v),phi(info.phi), rotation_s(info.r_s), tilt(info.t), num_moons(info.moons)
 {
     int i;
     for( i = 0; i < 3; i++)
@@ -19,6 +19,7 @@ Planet::Planet( Planet_Info &info ):r(info.r), orbital_r(info.o_r), theta(info.t
     strcpy(planet_name, info.name);
     moons = new Planet* [num_moons];
     allocated_moons = 0;
+    parent = ptr;
 }
 
 Planet::~Planet()
@@ -40,6 +41,13 @@ Planet* Planet::add_moon(Planet_Info &info )
     return moons[ allocated_moons - 1 ];
 }
 
+void get_location( long double &x, long double &y )
+{
+    if(Null!= parent)
+        parent->get_location(x,y);
+    x = orbital_r*cos(theta);
+    y = orbital_r*sin(theta);
+}
 
 void Planet::animate( )
 {

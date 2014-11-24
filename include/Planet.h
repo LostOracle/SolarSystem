@@ -10,7 +10,7 @@ class Planet
            // Planet(const char* planet_name, double planet_radius, double orbital_radius, 
            //        double theta, double orbital_velocity, double rotation_speed, double tilt, 
            //       const double* color, const char* file_name );
-            Planet(Planet_Info &info);
+            Planet(Planet_Info &info, Planet *parent);
             ~Planet();
 
  
@@ -31,6 +31,8 @@ class Planet
             void get_diffuse( double old_diffuse[] );
             void get_specular( double old_specular[] );
  
+
+            void get_location( long double &x, long double &y);
             void get_planet_name(char * out_str);
             int get_num_moons();
             Planet* add_moon(Planet_Info &info);
@@ -66,7 +68,7 @@ class Planet
             void animate_smooth();
             void animate_texture();
             
-
+            Planet *parent;
             Planet **moons;
             int num_moons;
             int allocated_moons;
