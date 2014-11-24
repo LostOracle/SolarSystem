@@ -74,7 +74,7 @@ void Planet::animate()
         theta -= 360;
 
     phi += ( rotation_s * time_step );
-    while( rotation_s > 360 )
+    while( phi > 360 )
         rotation_s -= 360;
 
  for( int i = 0; i < allocated_moons; i++ ) 
