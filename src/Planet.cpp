@@ -48,12 +48,21 @@ Planet* Planet::add_moon(Planet_Info &info )
     return moons[ allocated_moons - 1 ];
 }
 
+#include <iostream>
+using namespace std;
 void  Planet::get_location( long double &x, long double &y )
 {
     x = 0;
     y = 0;
     if(NULL !=  parent)
+    {
+        char name[1000];
+        parent->get_planet_name(name);
+        cout << "Parent: " << name << endl;
         parent -> get_location(x,y);
+    }
+    else
+        cout << "No parent" << endl;
     x += (orbital_r*cos(theta));
     y += (orbital_r*sin(theta));
 }

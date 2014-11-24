@@ -7,6 +7,7 @@
 #include "../include/Camera_Structs.h"
 #include <iostream>
 #include <math.h>
+#include <vector>
 
 using namespace std;
 void OpenGLInit( void );
@@ -24,6 +25,8 @@ float AnimateIncrement = 24.0;  // animation time step (hours)
 int num_planets;
 
 Planet ** planets;
+vector<Planet *> all_celestial_bodies;
+Planet * target_lock;
 
 camera_position CameraPos;
 
@@ -81,14 +84,31 @@ void Animate( void )
 {
     // Clear the redering window
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+    //track the target planet, if any
+    if(target_lock != NULL)
+    {
+        long double target_x, target_y;
+        long double vect_x, vect_y, vect_z;
+        char name[1000];
+        target_lock->get_planet_name(name);
+        vect_x = CameraPos.at_x - CameraPos.ey_x;
+        vect_y = CameraPos.at_y - CameraPos.ey_y;
+
+        cout << "Locking to: " << name << endl;
+        target_lock->get_location(target_x,target_y);
+        cout << "Jumping to: " << target_x << " " << target_y << endl;
+        CameraPos.at_x = target_x;
+        CameraPos.at_y = target_y;
+        CameraPos.ey_x = CameraPos.at_x - vect_x;
+        CameraPos.ey_y = CameraPos.at_y - vect_y;
+    }
+
     
     glLoadIdentity();
     gluLookAt(CameraPos.ey_x,CameraPos.ey_y,CameraPos.ey_z,
               CameraPos.at_x,CameraPos.at_y,CameraPos.at_z,
               CameraPos.up_x,CameraPos.up_y,CameraPos.up_z);
-    glRotatef(90.0, 0.0, 0.0, 1.0);
-    glColor3f(1.0,1.0,0.0);
-    glutWireSphere(6960, 50, 50);
     for(int i = 0; i < NUM_PLANETS; i++)
     {
         glPushMatrix();
@@ -387,8 +407,6 @@ int main( int argc, char** argv )
     //create an array of points to that many objects
     planets = new Planet*[num_planets];
 
-    Planet_Info info;
-    
     for(int i = 0; i < NUM_PLANETS; i++)
     {
         get_planet(NULL,in,i);
@@ -428,15 +446,18 @@ void get_planet(Planet * parent, FILE *& in, int planets_index)
 
     Planet_Info info;
     //read the next line of the file
-    fscanf(in,"%s %Lg %Lg %Lg %Lg %Lg %Lg %Lg %lf %lf %lf %s %d",
-            info.name,&info.r,&info.o_r,&info.th,&info.o_v,&info.phi,&info.r_s,&info.t,&info.color[0],&info.color[1],&info.color[2],info.texture, &info.moons);
+    fscanf(in,"%s %Lg %Lg %Lg %Lg %Lg %Lg %Lg %lf %lf %lf %s %d %d",
+            info.name,&info.r,&info.o_r,&info.th,&info.o_v,&info.phi,&info.r_s,&info.t,&info.color[0],&info.color[1],&info.color[2],info.texture, &info.moons, &info.rings);
+    if(info.rings)
+        fscanf(in,"%Lg %Lg %s",&info.inner_r, &info.outer_r, info.ring_texture);
 
     if(NULL == parent)
     {
         cout << "Adding planet: " << info.name << endl;
-        planets[planets_index] = new Planet(info);
+        planets[planets_index] = new Planet(info,NULL);
         for(int i = 0; i < info.moons; i++)
             get_planet(planets[planets_index],in,0);//the index doesn't matter if the parent * is non null
+        all_celestial_bodies.push_back(planets[planets_index]);
     }
     else
     {
@@ -446,6 +467,7 @@ void get_planet(Planet * parent, FILE *& in, int planets_index)
         Planet * new_parent = parent->add_moon(info);
         for(int i = 0; i < info.moons; i++)
             get_planet(new_parent,in,0);//the index doesn't matter if the parent * is non null
+        all_celestial_bodies.push_back(new_parent);
     }
 }    
 
@@ -455,29 +477,20 @@ void CreateMenus()
     // create submenu
     int value = 1;
 
-    int testSubMenu = glutCreateMenu( testSubMenuHandler);
-    glutAddMenuEntry("test1",value++);
-    glutAddMenuEntry("test2",value++);
-
     int displaySubMenu = glutCreateMenu( displaySubMenuHandler );
     glutAddMenuEntry( "Wireframe", value++ );
     glutAddMenuEntry( "Flat Shading", value++ );
     glutAddMenuEntry( "Smooth Shading", value++ );
     glutAddMenuEntry( "Textures", value++ );
-    glutAddSubMenu("test menu",testSubMenu);
 
     value = 1;
     int jumpToSubMenu = glutCreateMenu(jumpToSubMenuHandler);
-    glutAddMenuEntry( "Sun",value++);
-    glutAddMenuEntry( "Mercury",value++);
-    glutAddMenuEntry( "Venus",value++);
-    glutAddMenuEntry( "Earth",value++);
-    glutAddMenuEntry( "Moon",value++);
-    glutAddMenuEntry( "Mars",value++);
-    glutAddMenuEntry( "Jupiter",value++);
-    glutAddMenuEntry( "Saturn",value++);
-    glutAddMenuEntry( "Uranus",value++);
-    glutAddMenuEntry( "Neptune",value++);
+    for(unsigned int i = 0; i < all_celestial_bodies.size(); i++)
+    {
+        char name[1024];
+        all_celestial_bodies[i]->get_planet_name(name);
+        glutAddMenuEntry(name,value++);
+    }
 
     // create main menu
     int mainmenu = glutCreateMenu( MainMenuHandler );
@@ -540,8 +553,10 @@ void displaySubMenuHandler( int item )
 void jumpToSubMenuHandler( int item )
 {
     char name[1024];
-    double x,y,z;
-    planets[item-1]->get_planet_name(name);
+    long double x,y;
+    target_lock = all_celestial_bodies[item-1];
+    all_celestial_bodies[item-1]->get_location(x,y);
+
+    all_celestial_bodies[item-1]->get_planet_name(name);
     cout << "Jump to: " << name << endl;
-    //planets[item-1]->get_coords(x,y);
 }
