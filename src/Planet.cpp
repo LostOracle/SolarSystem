@@ -43,7 +43,7 @@ void Planet::get_planet_name(char * out_str)
 
 Planet* Planet::add_moon(Planet_Info &info )
 {
-    moons[allocated_moons] = new Planet(info);
+    moons[allocated_moons] = new Planet(info, this);
     allocated_moons +=1;
     return moons[ allocated_moons - 1 ];
 }
