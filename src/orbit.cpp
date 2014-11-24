@@ -289,16 +289,22 @@ void rotate_pitch(double amount)
 
 void rotate_roll(double amount)
 {
+    double mag = 0;
+    mag += (CameraPos.at_x-CameraPos.ey_x)*(CameraPos.at_x-CameraPos.ey_x);
+    mag += (CameraPos.at_y-CameraPos.ey_y)*(CameraPos.at_y-CameraPos.ey_y);
+    mag += (CameraPos.at_z-CameraPos.ey_z)*(CameraPos.at_z-CameraPos.ey_z);
+    mag = sqrt(mag);
+
     //rotate up and left about at by amount*camera_rotate_coeff
     rotate_about_axis3(CameraPos.lf_x, CameraPos.lf_y, CameraPos.lf_z,
-                       CameraPos.at_x-CameraPos.ey_x,
-                       CameraPos.at_y-CameraPos.ey_y,
-                       CameraPos.at_z-CameraPos.ey_z,
+                       (CameraPos.at_x-CameraPos.ey_x)/mag,
+                       (CameraPos.at_y-CameraPos.ey_y)/mag,
+                       (CameraPos.at_z-CameraPos.ey_z)/mag,
                        amount*camera_rotate_coeff);
     rotate_about_axis3(CameraPos.up_x, CameraPos.up_y, CameraPos.up_z,
-                       CameraPos.at_x-CameraPos.ey_x,
-                       CameraPos.at_y-CameraPos.ey_y,
-                       CameraPos.at_z-CameraPos.ey_z,
+                       (CameraPos.at_x-CameraPos.ey_x)/mag,
+                       (CameraPos.at_y-CameraPos.ey_y)/mag,
+                       (CameraPos.at_z-CameraPos.ey_z)/mag,
                        amount*camera_rotate_coeff);
 }
 void rotate_about_axis3(double &x, double &y, double &z, 
