@@ -45,8 +45,8 @@ void  Planet::get_location( long double &x, long double &y )
 {
     if(NULL!= parent)
         parent->get_location(x,y);
-    x = orbital_r*cos(theta);
-    y = orbital_r*sin(theta);
+    x += (orbital_r*cos(theta));
+    y += (orbital_r*sin(theta));
 }
 
 void Planet::animate( )
