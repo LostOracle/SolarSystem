@@ -13,6 +13,7 @@ struct Planet_Info
     long double t;
     double color[3]; 
     char texture[1024];
+    int moons;
 };
 
 

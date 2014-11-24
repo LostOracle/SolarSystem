@@ -9,7 +9,7 @@
 }
 */
 
-Planet::Planet( Planet_Info &info ):r(info.r), orbital_r(info.o_r), theta(info.th), orbital_v(info.o_v),phi(info.phi), rotation_s(info.r_s), tilt(info.t)
+Planet::Planet( Planet_Info &info ):r(info.r), orbital_r(info.o_r), theta(info.th), orbital_v(info.o_v),phi(info.phi), rotation_s(info.r_s), tilt(info.t), num_moons(info.moons)
 {
     int i;
     for( i = 0; i < 3; i++)
@@ -17,16 +17,27 @@ Planet::Planet( Planet_Info &info ):r(info.r), orbital_r(info.o_r), theta(info.t
 
     strcpy(texture_name, info.texture);
     strcpy(planet_name, info.name);
+    moons = new Planets* [num_moons];
+    allocated_moons = 0;
 }
 
 Planet::~Planet()
 {
-
+    for( int i = 0; i < allocated_moons; i++)
+        delete moons[i];
+    delete []moons;
 }
 
 void Planet::get_planet_name(char * out_str)
 {
     strcpy(out_str,planet_name);
+}
+
+Planet* Planet::add_moon(Planet_Info &info )
+{
+    moons[allocated_moons] = new Planet(info);
+    allocated_moons +=1;
+    return moons[allocated_moons];
 }
 
 
@@ -57,7 +68,6 @@ void Planet::animate( )
     glTranslatef( orbital_r, 0.0,0.0 );
     // Second, rotate the planet on its axis. 
     glRotatef( phi, 0.0, 0.0, 1.0 );   
-    draw_mode = 0;
     if( draw_mode == 0)
     {
         animate_wire();
@@ -74,6 +84,14 @@ void Planet::animate( )
     {
         animate_texture();
     }
+    glPushMatrix();
+    for( i = 0; i < allocated_moons; i++)
+    {
+        moons[i]->animate();
+        glPopMatrix();
+        glPushMatrix();
+    }
+    glPopMatrix();
 }
 
 void Planet::set_time_step( const long double &new_time_step )

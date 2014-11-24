@@ -31,8 +31,9 @@ class Planet
             void get_diffuse( double old_diffuse[] );
             void get_specular( double old_specular[] );
  
-            void get_planet_name(char * out_str);    
-    
+            void get_planet_name(char * out_str);
+            int get_num_moons();
+            Planet* add_moon(Planet_info &info);
     private:
 
             static char draw_mode;
@@ -64,6 +65,11 @@ class Planet
             void animate_flat();
             void animate_smooth();
             void animate_texture();
+            
+
+            Planet *moons;
+            int num_moons;
+            int allocated_moons;
 };
 
 
