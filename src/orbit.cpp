@@ -29,7 +29,7 @@ camera_position CameraPos;
 
 camera_velocity CameraVel;
 
-const double camera_translate_coeff = 1;
+const double camera_translate_coeff = 100;
 const double camera_rotate_coeff = 1;
 // Animate() handles the animation and the redrawing of the graphics window contents.
 void keyboard( unsigned char key, int x, int y );
@@ -431,13 +431,18 @@ void get_planet(Planet * parent, FILE *& in, int planets_index)
     fscanf(in,"%s %Lg %Lg %Lg %Lg %Lg %Lg %Lg %lf %lf %lf %s %d",
             info.name,&info.r,&info.o_r,&info.th,&info.o_v,&info.phi,&info.r_s,&info.t,&info.color[0],&info.color[1],&info.color[2],info.texture, &info.moons);
 
-    cout << "Adding planet: " << info.name << endl;
     if(NULL == parent)
     {
+        cout << "Adding planet: " << info.name << endl;
         planets[planets_index] = new Planet(info);
+        for(int i = 0; i < info.moons; i++)
+            get_planet(planets[planets_index],in,0);//the index doesn't matter if the parent * is non null
     }
     else
     {
+        char name[1000];
+        parent->get_planet_name(name);
+        cout << "\tAdding moon to planet: " << name << "moon name: " << info.name << endl;
         Planet * new_parent = parent->add_moon(info);
         for(int i = 0; i < info.moons; i++)
             get_planet(new_parent,in,0);//the index doesn't matter if the parent * is non null
