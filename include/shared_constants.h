@@ -1,7 +1,7 @@
 
 
 /***PLANET DEFINES***/
-#define NUM_PLANETS 8
+#define NUM_PLANETS 9
 
 
 
