@@ -54,7 +54,7 @@ void Planet::animate( )
     glEnd();
 
     glRotatef( theta, 0.0, 0.0, 1.0 );
-    glTranslatef( orbital_r/2.0, 0.0,-1000.0 );
+    glTranslatef( orbital_r/2.0, 0.0,0.0 );
     // Second, rotate the planet on its axis. 
     glRotatef( phi, 0.0, 0.0, 1.0 );   
     draw_mode = 0;
