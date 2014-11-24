@@ -55,7 +55,7 @@ void init_camera()
 {
     CameraPos.ey_x = 0;
     CameraPos.ey_y = 0;
-    CameraPos.ey_z = 0;
+    CameraPos.ey_z = 1000000;
     CameraPos.at_x = 0;
     CameraPos.at_y = 0;
     CameraPos.at_z = -1;
@@ -83,7 +83,6 @@ void Animate( void )
     gluLookAt(CameraPos.ey_x,CameraPos.ey_y,CameraPos.ey_z,
               CameraPos.at_x,CameraPos.at_y,CameraPos.at_z,
               CameraPos.up_x,CameraPos.up_y,CameraPos.up_z);
-    glTranslatef(0.0, 0.0, -1000000.0);
     glRotatef(90.0, 0.0, 0.0, 1.0);
     glColor3f(1.0,1.0,0.0);
     glutWireSphere(6960, 50, 50);
@@ -486,18 +485,8 @@ void displaySubMenuHandler( int item )
 void jumpToSubMenuHandler( int item )
 {
     char name[1024];
+    double x,y,z;
     planets[item-1]->get_planet_name(name);
     cout << "Jump to: " << name << endl;
-    switch ( item )
-    {
-        case 1:
-        case 2:
-        case 3:
-        case 4:
-            cout << "you selected submenu item " << item << endl;
-            break;
-        default:    // should not occur
-            cout << "invalid submenu item " << item << endl;
-            break;
-    }
+    //planets[item-1]->get_coords(x,y);
 }
