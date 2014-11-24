@@ -134,8 +134,8 @@ void drag(int x, int y)
     y = ScreenHeight - y;
     double x_diff = x - last_click_x;
     double y_diff = y - last_click_y;
-    rotate_pitch(y_diff/100);
-    rotate_yaw(x_diff/100);
+    rotate_pitch(-y_diff/100);
+    rotate_yaw(-x_diff/100);
     last_click_x = x;
     last_click_y = y;
     cerr << "Drag to: (" << x << "," << y << ")\n";
@@ -485,6 +485,9 @@ void displaySubMenuHandler( int item )
 // only action is to print selected submenu entry
 void jumpToSubMenuHandler( int item )
 {
+    char name[1024];
+    planets[item-1]->get_planet_name(name);
+    cout << "Jump to: " << name << endl;
     switch ( item )
     {
         case 1:

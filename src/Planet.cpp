@@ -24,6 +24,10 @@ Planet::~Planet()
 
 }
 
+void Planet::get_planet_name(char * out_str)
+{
+    strcpy(out_str,planet_name);
+}
 
 
 void Planet::animate( )
