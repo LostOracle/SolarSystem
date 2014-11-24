@@ -196,5 +196,5 @@ void Planet::get_specular( double old_specular[] )
 
 
 /*******STATIC VARIABLES FOR CLASS**********/
-long double Planet::time_step = 200;
+long double Planet::time_step = 0;
 char Planet::draw_mode = 0;
