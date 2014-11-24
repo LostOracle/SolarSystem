@@ -17,7 +17,7 @@ Planet::Planet( Planet_Info &info ):r(info.r), orbital_r(info.o_r), theta(info.t
 
     strcpy(texture_name, info.texture);
     strcpy(planet_name, info.name);
-    moons = new Planets* [num_moons];
+    moons = new Planet* [num_moons];
     allocated_moons = 0;
 }
 
@@ -37,7 +37,7 @@ Planet* Planet::add_moon(Planet_Info &info )
 {
     moons[allocated_moons] = new Planet(info);
     allocated_moons +=1;
-    return moons[allocated_moons];
+    return moons[ allocated_moons - 1 ];
 }
 
 
@@ -85,7 +85,7 @@ void Planet::animate( )
         animate_texture();
     }
     glPushMatrix();
-    for( i = 0; i < allocated_moons; i++)
+    for( int i = 0; i < allocated_moons; i++)
     {
         moons[i]->animate();
         glPopMatrix();

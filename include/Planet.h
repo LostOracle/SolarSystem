@@ -33,7 +33,7 @@ class Planet
  
             void get_planet_name(char * out_str);
             int get_num_moons();
-            Planet* add_moon(Planet_info &info);
+            Planet* add_moon(Planet_Info &info);
     private:
 
             static char draw_mode;
@@ -67,7 +67,7 @@ class Planet
             void animate_texture();
             
 
-            Planet *moons;
+            Planet **moons;
             int num_moons;
             int allocated_moons;
 };
