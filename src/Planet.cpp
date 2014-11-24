@@ -87,18 +87,17 @@ void Planet::draw( )
     // Draw the Planet
     // First position it around the sun. Use DayOfYear to determine its position.
     glColor3f(1,1,1);
-    GLUquadricObj * object;
-    object = gluNewQuadric();
-    gluDisk(object,orbital_r*0.997,orbital_r*1.003,orbital_r*10,10);
-    /*glBegin( GL_LINE_STRIP );
-        for ( double i = 0.0; i < 200; i++ )
-        {
-            glVertex3f( orbital_r/2.0 * cos( 2 * M_PI * i / 200 ),  orbital_r/2.0 * sin( 2 * M_PI * i / 200 ),0 );
-        }
-    glEnd();*/
 
+    glPushMatrix();
+    //translate to the sun to draw the orbital torus
+    //the torus draws 90 degrees to everything else for some reason
+    glRotatef(90.0,1.0,0.0,0.0);
+    glTranslatef(-orbital_r,0.0,0.0);
+    glutWireTorus(orbital_r-200,orbital_r+200,50,1);
+    glPopMatrix();
     glRotatef( theta, 0.0, 0.0, 1.0 );
     glTranslatef( orbital_r, 0.0,0.0 );
+    
     // Second, rotate the planet on its axis. 
     glRotatef( phi, 0.0, 0.0, 1.0 );   
     if( draw_mode == 0)
@@ -214,6 +213,11 @@ void Planet::get_specular( double old_specular[] )
     old_specular[0] = specular[0];
     old_specular[1] = specular[1];
     old_specular[2] = specular[2];
+}
+
+long double Planet::get_radius()
+{
+    return orbital_r;
 }
    
 

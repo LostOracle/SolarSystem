@@ -13,7 +13,7 @@ struct camera_position
 struct camera_velocity
 {
     double x,y,z;
-    double th_x,th_y,th_z;
+    double roll,pitch,yaw;
 };
 
 #endif

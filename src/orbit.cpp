@@ -33,14 +33,13 @@ const int MouseButtonPress	= 0;
 const int MouseButtonRelease= 1;
 const int MouseLeftButton	= 0;
 const int MouseMiddleButton	= 1; //unused
-const int MouseRightButton	= 2; //unused
+const int MouseRightButton	= 1; //unused
 
 camera_position CameraPos;
 camera_velocity CameraVel;
-int camera_locked = 1; //start locked on the sun
 
 double camera_translate_coeff = 100;
-double camera_rotate_coeff = 1;
+double camera_rotate_coeff = .2;
 double time_step_coeff = 10;
 // Animate() handles the animation and the redrawing of the graphics window contents.
 void keyboard( unsigned char key, int x, int y );
@@ -51,6 +50,7 @@ void rotate_about_axis3(double &x, double &y, double &z,
 void SubMenuHandler( int item );
 void MainMenuHandler( int item );
 void testSubMenuHandler(int item);
+void zoom(double amount);
 void CreateMenus();
 void move_left(double amount);
 void move_up(double amount);
@@ -83,9 +83,9 @@ void init_camera()
     CameraVel.x = 0;
     CameraVel.y = 0;
     CameraVel.z = 0;
-    CameraVel.th_x = 0;
-    CameraVel.th_y = 0;
-    CameraVel.th_z = 0;
+    CameraVel.roll = 0;
+    CameraVel.pitch = 0;
+    CameraVel.yaw = 0;
 }
 
 void Animate( void )
@@ -101,19 +101,18 @@ void Animate( void )
     if(target_lock != NULL)
     {
         long double target_x, target_y;
-        long double vect_x, vect_y;
-        char name[1000];
-        target_lock->get_planet_name(name);
+        long double vect_x, vect_y,vect_z;
         vect_x = CameraPos.at_x - CameraPos.ey_x;
         vect_y = CameraPos.at_y - CameraPos.ey_y;
+        vect_z = CameraPos.at_z - CameraPos.ey_z;
 
-        cout << "Locking to: " << name << endl;
         target_lock->get_location(target_x,target_y);
-        cout << "Jumping to: " << target_x << " " << target_y << endl;
         CameraPos.at_x = target_x;
         CameraPos.at_y = target_y;
+        CameraPos.at_z = 0;
         CameraPos.ey_x = CameraPos.at_x - vect_x;
         CameraPos.ey_y = CameraPos.at_y - vect_y;
+        CameraPos.ey_z = CameraPos.at_z - vect_z;
     }
 
     //draw everything, the planets take care of drawing their moons
@@ -126,7 +125,6 @@ void Animate( void )
         glPushMatrix();
         planets[i]->draw();
         glPopMatrix();
-
     }
     glPopMatrix();
     glFlush();
@@ -158,20 +156,57 @@ void keyboardUp(unsigned char key, int x, int y)
 void click( int button, int state, int x, int y )
 {
     //only for clicks on the left mouse button
-    if(button == MouseLeftButton)
+    if(button == GLUT_LEFT_BUTTON)
     {
-        if(state == MouseButtonPress)
+        if(state == GLUT_DOWN)
         {
             y = ScreenHeight - y;
             last_click_x = x;
             last_click_y = y;
             left_dragging = true;
         }
-        if(state == MouseButtonRelease)
+        else if(state == GLUT_UP)
         {
             left_dragging = false;
         }
     }
+    else if(button == 3)
+    {
+        if(state == GLUT_DOWN)
+        {
+            //zoom in
+            zoom(0.05);
+            cout << "Zoom in" << endl;
+        }
+    }
+    else if(button == 4)
+    {
+        if(state == GLUT_DOWN)
+        {
+            zoom(-0.05);
+            cout << "zoom out" << endl;
+        }
+    }
+    else
+        cout << "button: " << button << "state: " << state << endl;
+}
+
+void zoom(double amount)
+{
+    //zooming doesn't make sense when there's no locked target
+    if(target_lock == NULL)
+        return;
+    //move 5% closer to the target object, if any
+    long double x,y,z;
+    x = CameraPos.ey_x - CameraPos.at_x;
+    y = CameraPos.ey_y - CameraPos.at_y;
+    z = CameraPos.ey_z - CameraPos.at_z;
+    x = (1-amount)*x;
+    y = (1-amount)*y;
+    z = (1-amount)*z;
+    CameraPos.ey_x = CameraPos.at_x + x;
+    CameraPos.ey_y = CameraPos.at_y + y;
+    CameraPos.ey_z = CameraPos.at_z + z;
 }
 
 void drag(int x, int y)
@@ -185,7 +220,6 @@ void drag(int x, int y)
     rotate_yaw(-x_diff/100);
     last_click_x = x;
     last_click_y = y;
-    cerr << "Drag to: (" << x << "," << y << ")\n";
 }
 /******************************************************************************
 * Function: keyboard( unsigned chart key, int x, int y )
@@ -310,7 +344,7 @@ void rotate_yaw(double amount)
     double y = CameraPos.at_y - CameraPos.ey_y;
     double z = CameraPos.at_z - CameraPos.ey_z;
     //maintain distance, but move eye left or right
-    if(camera_locked)
+    if(target_lock != NULL)
     {
         //invert the ey to at vector and rotate it around
         //the vector 0,0,1
@@ -318,12 +352,12 @@ void rotate_yaw(double amount)
         y=-y;
         z=-z;
         rotate_about_axis3(x,y,z,
-                           0,0,1,
+                CameraPos.up_x,CameraPos.up_y,CameraPos.up_z,
                            amount*camera_rotate_coeff);
 
         //also update the left vector
         rotate_about_axis3(CameraPos.lf_x, CameraPos.lf_y, CameraPos.lf_z,
-                0,0,1,
+                CameraPos.up_x,CameraPos.up_y,CameraPos.up_z,
                 amount*camera_rotate_coeff);
         CameraPos.ey_x = CameraPos.at_x + x;
         CameraPos.ey_y = CameraPos.at_y + y;
@@ -353,7 +387,7 @@ void rotate_pitch(double amount)
     double y = CameraPos.at_y - CameraPos.ey_y;
     double z = CameraPos.at_z - CameraPos.ey_z;
     //invert x,y,z and rotate that vector about lf then move ey
-    if(camera_locked)
+    if(target_lock != NULL)
     {
         rotate_about_axis3(CameraPos.up_x,CameraPos.up_y,CameraPos.up_z,
                            CameraPos.lf_x,CameraPos.lf_y,CameraPos.lf_z,
@@ -461,7 +495,7 @@ void ResizeWindow( int w, int h )
     // Set up the projection view matrix (not very well!)
     glMatrixMode( GL_PROJECTION );
     glLoadIdentity();
-    gluPerspective( 30.0, aspectRatio, 0.0, 2000000000.0 );
+    gluPerspective( 30.0, aspectRatio, 1.0, 2000000000.0 );
 
     // Select the Modelview matrix
     glMatrixMode( GL_MODELVIEW );
@@ -488,6 +522,8 @@ int main( int argc, char** argv )
         get_planet(NULL,in,i);
     }
     fclose(in);
+    //start off locked on the sun, which is the first planet in the file
+    target_lock = planets[0];
         
     // Need to double buffer for animation
     init_camera();
@@ -569,11 +605,12 @@ void CreateMenus()
     }
 
     // create main menu
+    value = 1;
     int mainmenu = glutCreateMenu( MainMenuHandler );
     cout << "mainmenu id = " << mainmenu << endl;
     glutAddSubMenu("Display Method",displaySubMenu);
     glutAddSubMenu("Jump To",jumpToSubMenu);    
-
+    glutAddMenuEntry("Unlock Camera",value++);
     // right button click activates menu
     glutAttachMenu( GLUT_RIGHT_BUTTON );
 }
@@ -590,15 +627,7 @@ void MainMenuHandler( int item )
     switch ( item )
     {
         case 1:
-        case 2:
-        case 3:
-        case 4:
-        case 5:
-        case 6:
-        case 7:
-        case 8:
-        case 9:
-        case 10:
+            target_lock = NULL;
             cout << "you selected main menu item " << item << endl;
             break;
         default:    // should not occur
@@ -631,7 +660,6 @@ void jumpToSubMenuHandler( int item )
     char name[1024];
     long double x,y;
     target_lock = all_celestial_bodies[item-1];
-    camera_locked = 1;
     all_celestial_bodies[item-1]->get_location(x,y);
 
     all_celestial_bodies[item-1]->get_planet_name(name);

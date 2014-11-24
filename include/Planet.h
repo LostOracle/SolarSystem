@@ -36,6 +36,7 @@ class Planet
             void get_planet_name(char * out_str);
             int get_num_moons();
             Planet* add_moon(Planet_Info &info);
+            long double get_radius();
     private:
 
             static char draw_mode;
