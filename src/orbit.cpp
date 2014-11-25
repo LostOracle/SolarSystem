@@ -49,7 +49,6 @@ void rotate_about_axis3(double &x, double &y, double &z,
                         double x_hat, double y_hat, double z_hat, double rads);
 void SubMenuHandler( int item );
 void MainMenuHandler( int item );
-void testSubMenuHandler(int item);
 void zoom(double amount);
 void CreateMenus();
 void move_left(double amount);
@@ -530,6 +529,23 @@ int main( int argc, char** argv )
     glutInit( &argc, argv );
     glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
 
+    glEnable( GL_DEPTH_TEST );  // enable depth buffer for hidden-surface elimination
+    glEnable( GL_NORMALIZE );   // automatic normalization of normals
+    glEnable( GL_CULL_FACE );   // eliminate backfacing polygons
+    glCullFace( GL_BACK );
+    
+// specify light source properties
+    GLfloat light_position[] = { 10.0, 10.0, 10.0, 1.0 };
+    GLfloat light_ambient[] = { 0.4, 0.4, 0.4, 1.0 };       // ambient light
+    GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };       // diffuse light
+    GLfloat light_specular[] = { 1.0, 1.0, 1.0, 1.0 };      // highlights
+
+    glEnable( GL_LIGHT0 );      // enable one light source
+    glLightfv( GL_LIGHT0, GL_POSITION, light_position );
+    glLightfv( GL_LIGHT0, GL_AMBIENT, light_ambient );
+    glLightfv( GL_LIGHT0, GL_DIFFUSE, light_diffuse );
+    glLightfv( GL_LIGHT0, GL_SPECULAR, light_specular );
+
     // Create and position the graphics window
     glutInitWindowPosition( 0, 0 );
     glutInitWindowSize( 600, 360 );
@@ -615,11 +631,6 @@ void CreateMenus()
     glutAttachMenu( GLUT_RIGHT_BUTTON );
 }
 
-void testSubMenuHandler(int item)
-{
-
-}
-
 // MainMenuHandler() controls the main menu
 // only action is to print selected menu entry
 void MainMenuHandler( int item )
@@ -638,7 +649,7 @@ void MainMenuHandler( int item )
 
 void displaySubMenuHandler( int item )
 {
-            Planet::set_draw_mode(item - 1);
+    Planet::set_draw_mode(item - 1);
 }
 
 // SubMenuHandler() controls the submenu
