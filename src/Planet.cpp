@@ -118,6 +118,7 @@ void Planet::animate()
 
 void Planet::draw( )
 {
+    emissivity[2] = 0;
     // Draw the Planet
     // First position it around the sun. Use DayOfYear to determine its position.
     glColor3f(1,1,1);
@@ -152,6 +153,9 @@ void Planet::draw( )
     }
     else
     {
+        emissivity[2] = 1;
+        if(0 == orbital_r)
+            glMaterialfv(GL_FRONT, GL_EMISSION,emissivity );
         animate_texture();
     }
 
@@ -294,7 +298,8 @@ void Planet::animate_texture()
         gluQuadricDrawStyle( ring_obj, GLU_FILL );
         gluQuadricNormals( ring_obj, GLU_SMOOTH);
         gluQuadricTexture(ring_obj, GL_TRUE );
-        gluCylinder( ring_obj,inner_r, outer_r,1,wire_res,wire_res); 
+        gluCylinder( ring_obj,inner_r, outer_r,1,wire_res,wire_res);
+        glDisable(GL_TEXTURE_2D);
         glEnable( GL_CULL_FACE );
     }
 }
