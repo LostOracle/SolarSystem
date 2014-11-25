@@ -585,6 +585,6 @@ void skipChars( FILE* infile, int numChars )
     }
 }
 /*******STATIC VARIABLES FOR CLASS**********/
-long double Planet::time_step = 40;
+long double Planet::time_step = 0.5;
 char Planet::draw_mode = 0;
 double Planet::wire_res = 64;

@@ -351,7 +351,7 @@ void MainMenuHandler( int item )
         break;
     //display readme for detailed help
     case 8:
-
+        system("gedit Readme.txt");
         break;
     default:    // should not occur
         cout << "invalid main menu item " << item << endl;

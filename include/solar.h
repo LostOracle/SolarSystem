@@ -11,6 +11,7 @@
 #include <cstdlib>
 #include <GL/freeglut.h>
 #include "Planet.h"
+#include <stdlib.h>
 #include <stdio.h>
 #include "Planet_Info.h"
 #include "shared_constants.h"
