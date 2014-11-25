@@ -1,3 +1,9 @@
+/************************************************************************
+* File: shared_constants.h
+* Author: Chris Smith, Ian Carlson
+* Description: Shared constants used between files 
+* Date: 20 Nov 2014
+************************************************************************/
 #ifndef _SHARED_CONSTANTS_H_
 #define _SHARED_CONSTANTS_H_
 

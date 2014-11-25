@@ -1,6 +1,3 @@
-#include "../include/Planet.h"
-
-
 /************************************************************************
 * File: Planet.cpp
 * Author: Chris Smith, Ian Carlson
@@ -8,6 +5,10 @@
 * As well as the functions that Dr. Weiss created for reading bmp images.
 * Date: 20 Nov 2014
 ************************************************************************/
+
+#include "../include/Planet.h"
+
+
 /************************************************************************
    Function:Planet::Planet
    Author: Chris Smith, Ian Carlson
