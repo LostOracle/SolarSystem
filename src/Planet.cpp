@@ -142,6 +142,7 @@ void Planet::draw( )
     glTranslatef( 0.0, 0.0, r * 2.0 );
     glRotatef( 90, 1, 0, 0 );
     glScalef( 100, 100, 100 );
+    glColor3f( color[0], color[1], color[2] );
     glutStrokeString(GLUT_STROKE_ROMAN, (const unsigned char *)planet_name);
     glPopMatrix();
 
@@ -214,10 +215,10 @@ void Planet::animate_texture()
     glEnable(GL_TEXTURE_2D);
     // Pixel alignment: each row is word aligned (aligned to a 4 byte boundary)
     // Therefore, no need to call glPixelStore( GL_UNPACK_ALIGNMENT, ... );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
     gluBuild2DMipmaps( GL_TEXTURE_2D, GL_RGB, texture_cols, texture_rows, GL_RGB, GL_UNSIGNED_BYTE, image );
     
 // generate GLU quadric sphere with surface normals and texture coordinates
