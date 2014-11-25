@@ -119,6 +119,8 @@ void Animate( void )
     gluLookAt(CameraPos.ey_x,CameraPos.ey_y,CameraPos.ey_z,
               CameraPos.at_x,CameraPos.at_y,CameraPos.at_z,
               CameraPos.up_x,CameraPos.up_y,CameraPos.up_z);
+    GLfloat light_position[] = { 0, 0, 0, 1.0 };
+    glLightfv( GL_LIGHT0, GL_POSITION, light_position );
     for(int i = 0; i < NUM_PLANETS; i++)
     {
         glPushMatrix();
@@ -465,20 +467,6 @@ void rotate_about_axis3(double &x, double &y, double &z,
     z = new_z;
 }
 
-// Initialize OpenGL's rendering modes
-void OpenGLInit( void )
-{
-    //glShadeModel( GL_FLAT );
-    glClearColor( 0.0, 0.0, 0.0, 0.0 );
-    glClearDepth( 1.0 );
-    //glEnable( GL_DEPTH_TEST );
-    glutKeyboardFunc( keyboard );
-    glutKeyboardUpFunc( keyboardUp);
-    glutSpecialFunc(special_keyboard);
-    glutMouseFunc( click );
-    glutMotionFunc( drag );
-    CreateMenus();
-}
 
 // ResizeWindow is called when the window is resized
 void ResizeWindow( int w, int h )
@@ -498,6 +486,46 @@ void ResizeWindow( int w, int h )
 
     // Select the Modelview matrix
     glMatrixMode( GL_MODELVIEW );
+}
+
+// Initialize OpenGL's rendering modes
+void OpenGLInit( void )
+{
+    // Create and position the graphics window
+    glutInitWindowPosition( 0, 0 );
+    glutInitWindowSize( 600, 360 );
+    glutCreateWindow( "Solar System" );
+
+    // specify light source properties
+    GLfloat light_ambient[] = { 0, 0, 0, 1.0 };       // ambient light
+    GLfloat light_diffuse[] = { 0.5, 0.5, 0.5, 1.0 };       // diffuse light
+    GLfloat light_specular[] = { 0.2, 0.2, 0.2, 1.0 };      // highlights
+   
+    glEnable(GL_LIGHT0);
+    glLightfv( GL_LIGHT0, GL_AMBIENT, light_ambient );
+    glLightfv( GL_LIGHT0, GL_DIFFUSE, light_diffuse );
+    glLightfv( GL_LIGHT0, GL_SPECULAR, light_specular );
+    
+    glEnable( GL_DEPTH_TEST );  // enable depth buffer for hidden-surface elimination
+    glEnable( GL_NORMALIZE );   // automatic normalization of normals
+    glEnable( GL_CULL_FACE );   // eliminate backfacing polygons
+    glEnable( GL_LIGHTING ) ;
+    
+    glShadeModel( GL_FLAT );
+    glClearColor( 0.0, 0.0, 0.0, 0.0 );
+    glClearDepth( 1.0 );
+    glutKeyboardFunc( keyboard );
+    glutKeyboardUpFunc( keyboardUp);
+    glutSpecialFunc(special_keyboard);
+    glutMouseFunc( click );
+    glutMotionFunc( drag );
+    glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
+    // Set up the callback function for resizing windows
+    glutReshapeFunc( ResizeWindow );
+
+    // Callback for graphics image redrawing
+    glutDisplayFunc( Animate );
+    CreateMenus();
 }
 
 // Main routine
@@ -530,38 +558,10 @@ int main( int argc, char** argv )
     glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
 
     
-// specify light source properties
-    GLfloat light_position[] = { 0, 0, 1, 0.0 };
-    GLfloat light_ambient[] = { 0.0, 0.0, 0.0, 1.0 };       // ambient light
-    GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };       // diffuse light
-    GLfloat light_specular[] = { 1.0, 1.0, 1.0, 1.0 };      // highlights
-    
-    glLightfv( GL_LIGHT0, GL_POSITION, light_position );
-    glLightfv( GL_LIGHT0, GL_AMBIENT, light_ambient );
-    glLightfv( GL_LIGHT0, GL_DIFFUSE, light_diffuse );
-    glLightfv( GL_LIGHT0, GL_SPECULAR, light_specular );
-    
-    glEnable( GL_LIGHT0 );      // enable one light source
-    
-    glEnable( GL_DEPTH_TEST );  // enable depth buffer for hidden-surface elimination
-    glEnable( GL_NORMALIZE );   // automatic normalization of normals
-    glEnable( GL_CULL_FACE );   // eliminate backfacing polygons
-    glEnable( GL_LIGHTING ) ;
-    glDisable(GL_COLOR_MATERIAL);
 
-    // Create and position the graphics window
-    glutInitWindowPosition( 0, 0 );
-    glutInitWindowSize( 600, 360 );
-    glutCreateWindow( "Solar System" );
 
     // Initialize OpenGL.
     OpenGLInit();
-    glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
-    // Set up the callback function for resizing windows
-    glutReshapeFunc( ResizeWindow );
-
-    // Callback for graphics image redrawing
-    glutDisplayFunc( Animate );
 
     // Start the main loop.  glutMainLoop never returns.
     glutMainLoop( );
