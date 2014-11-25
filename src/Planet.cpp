@@ -1,26 +1,36 @@
 #include "../include/Planet.h"
 
-/*Planet::Planet(const char* planet_name, double planet_radius, double orbital_radius, double theta, 
-               double orbital_velocity, double rotation_speed, double tilt, const double * color, 
-               const char * texture_filename)
-{
-    
 
-}
-*/
-
+/************************************************************************
+* File: Planet.cpp
+* Author: Chris Smith, Ian Carlson
+* Description: Src file that implements the Planet class from the Planet.h
+* As well as the functions that Dr. Weiss created for reading bmp images. 
+* Date: 20 Nov 2014
+************************************************************************/
+/************************************************************************
+   Function:Planet::Planet
+   Author: Chris Smith, Ian Carlson
+   Description: Constructor for the planet class that takes an Planet info argument and a Ptr argument
+   Parameters: info is the information of the planet to draw correctly
+               ptr is a pointer to the parent of the object so that a moon would have a parent but a planet wouldn't
+   Returns: None
+   Description: Constructor for the planet class that takes a Planet info argument and a ptr argument
+ ************************************************************************/
 Planet::Planet( Planet_Info &info, Planet* ptr = NULL  ):r(info.r), orbital_r(info.o_r), theta(info.th), orbital_v(info.o_v),phi(info.phi), rotation_s(info.r_s), tilt(info.t), num_moons(info.moons), rings(info.rings)
 {
+    //Copies the array of colors into class variable
     int i;
     for( i = 0; i < 3; i++)
         color[i] = info.color[i];
-
+    //copys the file name of the texture image
     strcpy(texture_name, info.texture);
     if ( !LoadBmpFile(texture_name, texture_rows, texture_cols, image ) )
     {
         printf("failed to load texture.\n");
         return;
     }
+    //if the planet has rings it stores the extra information
     strcpy(planet_name, info.name);
     if( 1 == rings )
     {
@@ -32,10 +42,12 @@ Planet::Planet( Planet_Info &info, Planet* ptr = NULL  ):r(info.r), orbital_r(in
             return;
         }
     }
+    //if planet has moons an array of moon objects is created
     moons = new Planet* [num_moons];
     allocated_moons = 0;
+    //if the object is a moon it has a parent planet
     parent = ptr;
-
+    //initialises all lighting effects for planets
     ambient[0] = .5;
     ambient[1] = .5;
     ambient[2] = .5;
@@ -48,6 +60,7 @@ Planet::Planet( Planet_Info &info, Planet* ptr = NULL  ):r(info.r), orbital_r(in
     specular[1] = .2;
     specular[2] = .2;
     specular[3] = 1;
+    //if the planet is the sun
     if( orbital_r == 0)
     {
         emissivity[0] = 1;
@@ -64,7 +77,13 @@ Planet::Planet( Planet_Info &info, Planet* ptr = NULL  ):r(info.r), orbital_r(in
     }
     shininess = 0;
 }
-
+/************************************************************************
+   Function:Planet::Planet
+   Author: Chris Smith, Ian Carlson
+   Parameters:None 
+   Returns: None
+   Description: Deconstructor for the planet class that deallocates memory
+ ************************************************************************/
 Planet::~Planet()
 {
     for( int i = 0; i < allocated_moons; i++)
@@ -72,19 +91,36 @@ Planet::~Planet()
     delete []moons;
     delete []image;
 }
-
+/************************************************************************
+   Function:Planet::Planet
+   Author: Chris Smith, Ian Carlson
+   Parameters: out_str is the name of the planet to be given back to caller
+   Returns: None
+   Description:Returns the caller the planet's name 
+ ************************************************************************/
 void Planet::get_planet_name(char * out_str)
 {
     strcpy(out_str,planet_name);
 }
-
+/************************************************************************
+   Function:Planet::add_moon
+   Author: Chris Smith, Ian Carlson
+   Parameters: info is thee information of the planet to draw correctly
+   Returns: Planet*
+   Description: Constructor for the Moon class that tells the constructor that it is the parent
+ ************************************************************************/
 Planet* Planet::add_moon(Planet_Info &info )
 {
     moons[allocated_moons] = new Planet(info, this);
     allocated_moons +=1;
     return moons[ allocated_moons - 1 ];
 }
-
+/************************************************************************
+   Function:Planet::get_location
+   Author: Chris Smith, Ian Carlson
+   Parameters: x,y (in,out) are the x and y locations of the planet to be returned
+   Description: calculates the location of the planet or the moon if it has a parent 
+ ************************************************************************/
 void  Planet::get_location( long double &x, long double &y )
 {
     if(NULL !=  parent)
@@ -99,7 +135,13 @@ void  Planet::get_location( long double &x, long double &y )
         y = (orbital_r*sin(M_PI*theta/180));
     }
 }
-
+/************************************************************************
+   Function:Planet::Planet
+   Author: Chris Smith, Ian Carlson
+   Parameters: None 
+   Returns: None
+   Description: Calculates the location for the planets at next time step
+ ************************************************************************/
 void Planet::animate()
 {
     theta += (orbital_v *time_step);
@@ -116,7 +158,13 @@ void Planet::animate()
 
 
 }
-
+/************************************************************************
+   Function:Planet::draw
+   Author: Chris Smith, Ian Carlson
+   Parameters:None 
+   Returns: None
+   Description: Draws the planets and then the corresponding shading model
+ ************************************************************************/
 void Planet::draw( )
 {
     emissivity[2] = 0;
@@ -187,33 +235,55 @@ void Planet::draw( )
         glPopMatrix();
     glPopMatrix();
 }
-
+/************************************************************************
+   Function:Planet::set_time_step
+   Author: Chris Smith, Ian Carlson
+   Description: Constructor for the planet class that takes an Planet info argument and a Ptr argument
+   Parameters: new_time_step - value to set the time step to
+   Returns: None
+   Description: sets the time step 
+ ************************************************************************/
 void Planet::set_time_step( const long double &new_time_step )
 {
     time_step = new_time_step;
 }
-long double Planet::get_time_step()
-{
-    return time_step;
-}
-
+/************************************************************************
+   Function:Planet::increment_time_step
+   Author: Chris Smith, Ian Carlson
+   Parameters: info is the information of the planet to draw correctly
+   Returns: None
+   Description: Adds or subtracts from time_step for slowdowns or increases
+ ************************************************************************/
 void Planet::increment_time_step( const long double &increment )
 {
     time_step += increment;
     if( time_step  < 0 )
         time_step = 0;
 }
-
+/************************************************************************
+   Function:Planet::set_draw_mode
+   Author: Chris Smith, Ian Carlson
+   Parameters: new_draw_mode - passed in via the right click menu
+   Returns: None
+   Description: Sets the draw mode
+ ************************************************************************/
 void Planet::set_draw_mode( const char &new_draw_mode )
 {
     draw_mode = new_draw_mode;
 }
+//gets the draw mode
 char Planet::get_draw_mode()
 {
     return draw_mode;
 }
 
-
+/************************************************************************
+   Function:Planet::animate_wire
+   Author: Chris Smith, Ian Carlson
+   Parameters:None 
+   Returns: None
+   Description: Draws the planet with wires and flat shading
+ ************************************************************************/
 void Planet::animate_wire()
 {
     glShadeModel( GL_FLAT );
@@ -227,10 +297,17 @@ void Planet::animate_wire()
         glColor3fv(color);
         gluQuadricDrawStyle( ring_obj, GLU_FILL );
         gluQuadricNormals( ring_obj, GLU_FLAT);
-        gluDisk( ring_obj,inner_r, outer_r,100,1000); 
+        gluDisk( ring_obj,inner_r, outer_r,wire_res,wire_res); 
         glEnable(GL_CULL_FACE);
     }
 }
+/************************************************************************
+   Function:Planet::animate_flat
+   Author: Chris Smith, Ian Carlson
+   Parameters: None 
+   Returns: None
+   Description: Draws the planet with flat shading
+ ************************************************************************/
 void Planet::animate_flat()
 {
     glShadeModel( GL_FLAT );
@@ -250,6 +327,14 @@ void Planet::animate_flat()
         glEnable( GL_CULL_FACE );
     }
 }
+/************************************************************************
+   Function:Planet::animate_smooth
+   Author: Chris Smith, Ian Carlson
+   Description: Constructor for the planet class that takes an Planet info argument and a Ptr argument
+   Parameters:None 
+   Returns: None
+   Description: Draws the planet with smooth shading
+ ************************************************************************/
 void Planet::animate_smooth()
 {
     glShadeModel( GL_SMOOTH );
@@ -269,7 +354,14 @@ void Planet::animate_smooth()
         glEnable( GL_CULL_FACE );
     }
 }
-
+/************************************************************************
+   Function:Planet::animate_texture
+   Author: Chris Smith, Ian Carlson
+   Description: Constructor for the planet class that takes an Planet info argument and a Ptr argument
+   Parameters: None
+   Returns: None
+   Description: Draws the planet with its corresponding texture map
+ ************************************************************************/
 void Planet::animate_texture()
 {
     glShadeModel( GL_SMOOTH );   
@@ -312,14 +404,13 @@ void Planet::animate_texture()
         glEnable( GL_CULL_FACE );
     }
 }
-
-
-void Planet::set_diffuse( const double &r, const double &g, const double &b) 
-{
-    diffuse[0] = r;
-    diffuse[1] = g;
-    diffuse[2] = b;
-}
+/************************************************************************
+   Function:Planet::increment_wire_res
+   Author: Chris Smith, Ian Carlson
+   Parameters: none
+   Returns: increments teh resolution of the wireframes
+   Description: returns the orbital radius from the sun
+ ************************************************************************/
 
 void Planet::increment_wire_res()
 {
@@ -327,53 +418,44 @@ void Planet::increment_wire_res()
     if(wire_res > 200 )
         wire_res = 200;
 }
+
+
+/************************************************************************
+   Function:Planet::decrement_wire_res
+   Author: Chris Smith, Ian Carlson
+   Parameters: none
+   Returns: none
+   Description: decrements the wire resolution
+ ************************************************************************/
+
 void Planet::decrement_wire_res()
 {
     wire_res-=2;
     if( wire_res < 2 )
         wire_res = 2;
 }
-
-void Planet::set_diffuse( const double new_diffuse[] )
-{
-    diffuse[0] = new_diffuse[0];
-    diffuse[1] = new_diffuse[1];
-    diffuse[2] = new_diffuse[2];
-}
-
-void Planet::set_specular(const double &r, const double &g, const double &b) 
-{
- specular[0] = r;
- specular[1] = g;
- specular[2] = b;
-}
-
-void Planet::set_specular( const double new_specular[] )
-{
-    specular[0] = new_specular[0];
-    specular[1] = new_specular[1];
-    specular[2] = new_specular[2];
-}
-
-void Planet::get_diffuse(double old_diffuse[] )
-{
-    old_diffuse[0] = diffuse[0];
-    old_diffuse[1] = diffuse[1];
-    old_diffuse[2] = diffuse[2];
-}
-
-void Planet::get_specular( double old_specular[] )
-{
-    old_specular[0] = specular[0];
-    old_specular[1] = specular[1];
-    old_specular[2] = specular[2];
-}
-
+/************************************************************************
+   Function:Planet::Planet
+   Author: Chris Smith, Ian Carlson
+   Parameters: none
+   Returns: orbital_r the radius
+   Description: returns the orbital radius from the sun
+ ************************************************************************/
 long double Planet::get_radius()
 {
     return orbital_r;
 }
-   
+
+/************************************************************************
+   Function: LoadBmpFile
+   Author: Dr. Weiss
+   Parameters: filename - file that is the image
+               NumRows - number of rows in image file
+               NumCols - Number of columns in image file
+               ImagePtr - points to the image and stores in memory
+   Returns: bool succeful read of file
+   Description: Reads in a bmp image file and stores it in memory
+ ************************************************************************/  
 bool LoadBmpFile( const char* filename, int &NumRows, int &NumCols, unsigned char* &ImagePtr )
 {
     FILE* infile = fopen( filename, "rb" );     // Open for reading binary data
@@ -449,13 +531,14 @@ bool LoadBmpFile( const char* filename, int &NumRows, int &NumCols, unsigned cha
 
     return true;
 }
+//Author: Dr. Weiss
 // Rows are word aligned
 inline int GetNumBytesPerRow( int NumCols )
 {
     return ( ( 3 * NumCols + 3 ) >> 2 ) << 2;
 }
 
-
+//Author: Dr. Weiss
 // read a 16-bit integer from the input file
 short readShort( FILE* infile )
 {
@@ -470,6 +553,7 @@ short readShort( FILE* infile )
     return ret;
 }
 
+//Author: Dr. Weiss
 // read a 32-bit integer from the input file
 int readLong( FILE* infile )
 {
@@ -490,6 +574,7 @@ int readLong( FILE* infile )
     return ret;
 }
 
+//Author: Dr. Weiss
 // skip over given number of bytes in input file
 void skipChars( FILE* infile, int numChars )
 {
