@@ -142,6 +142,7 @@ void Planet::draw( )
     glTranslatef( 0.0, 0.0, r * 2.0 );
     glRotatef( 90, 1, 0, 0 );
     glScalef( 100, 100, 100 );
+    glColor3f( color[0], color[1], color[2] );
     glutStrokeString(GLUT_STROKE_ROMAN, (const unsigned char *)planet_name);
     glPopMatrix();
 
