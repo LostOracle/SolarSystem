@@ -11,9 +11,10 @@ Program Description:
 bafflingly huge proportions, we did make the following modifications to reality
 in order to provide a more interesting simulation.
 
--
--
--
+-Reduced orbital distances by a factor of 100
+-Sun reduced in size by a 1/2
+-Increased all planets size by a factor of 10
+-Redcued Earth's Moon orbital distances by a factor of 2 while doubling Europa's
 
 Instructions:
     The program initially starts out with a view point locked onto the sun.
