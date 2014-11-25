@@ -228,13 +228,13 @@ void Planet::animate_flat()
     gluSphere( sphere, r, 64, 64 );
     if(rings)
     {
-        glDisable( GL_CULL_FACES);
+        glDisable( GL_CULL_FACE);
         ring_obj = gluNewQuadric();
         glColor3fv(color);
         gluQuadricDrawStyle( ring_obj, GLU_FILL );
         gluQuadricNormals( ring_obj, GLU_FLAT);
         gluCylinder( ring_obj,inner_r, outer_r,1,100,1000); 
-        glEnable( GL_CULL_FACES);
+        glEnable( GL_CULL_FACE );
     }
 }
 void Planet::animate_smooth()
