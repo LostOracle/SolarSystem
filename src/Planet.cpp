@@ -183,7 +183,7 @@ char Planet::get_draw_mode()
 
 void Planet::animate_wire()
 {
-    glShade_Model( GL_FLAT );
+    glShadeModel( GL_FLAT );
     // Third, draw the earth as a wireframe sphere.
     glColor3f( color[0], color[1], color[2] );
     glutWireSphere(r,100,100 );
