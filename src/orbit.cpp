@@ -82,7 +82,6 @@ void Animate( void )
         planets[i]->draw();
         glPopMatrix();
     }
-    glPopMatrix();
     glFlush();
     glutSwapBuffers();
     glutPostRedisplay();        // Request a re-draw for animation purposes
@@ -177,7 +176,6 @@ void get_planet(Planet * parent, FILE *& in, int planets_index)
 
     if(NULL == parent)
     {
-        cout << "Adding planet: " << info.name << endl;
         planets[planets_index] = new Planet(info,NULL);
         all_celestial_bodies.push_back(planets[planets_index]);
         for(int i = 0; i < info.moons; i++)
@@ -185,9 +183,6 @@ void get_planet(Planet * parent, FILE *& in, int planets_index)
     }
     else
     {
-        char name[1000];
-        parent->get_planet_name(name);
-        cout << "\tAdding moon to planet: " << name << "moon name: " << info.name << endl;
         Planet * new_parent = parent->add_moon(info);
         for(int i = 0; i < info.moons; i++)
             get_planet(new_parent,in,0);//the index doesn't matter if the parent * is non null
@@ -218,8 +213,7 @@ void CreateMenus()
 
     // create main menu
     value = 1;
-    int mainmenu = glutCreateMenu( MainMenuHandler );
-    cout << "mainmenu id = " << mainmenu << endl;
+    /*int mainmenu = */glutCreateMenu( MainMenuHandler );
     glutAddSubMenu("Display Method",displaySubMenu);
     glutAddSubMenu("Jump To",jumpToSubMenu);    
     glutAddMenuEntry("Unlock Camera",value++);
@@ -235,7 +229,6 @@ void MainMenuHandler( int item )
     {
         case 1:
             target_lock = NULL;
-            cout << "you selected main menu item " << item << endl;
             break;
         default:    // should not occur
             cout << "invalid main menu item " << item << endl;
@@ -252,11 +245,7 @@ void displaySubMenuHandler( int item )
 // only action is to print selected submenu entry
 void jumpToSubMenuHandler( int item )
 {
-    char name[1024];
     long double x,y;
     target_lock = all_celestial_bodies[item-1];
     all_celestial_bodies[item-1]->get_location(x,y);
-
-    all_celestial_bodies[item-1]->get_planet_name(name);
-    cout << "Jump to: " << name << endl;
 }

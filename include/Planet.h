@@ -63,7 +63,8 @@ class Planet
             //speed of planet orbit
             long double orbital_v;
             //planet rotation postion
-            long double phi;
+    public:            long double phi;
+    private:
             //how fast the planet rotates
             long double rotation_s;
             long double tilt;

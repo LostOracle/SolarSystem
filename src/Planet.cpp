@@ -87,16 +87,17 @@ Planet* Planet::add_moon(Planet_Info &info )
 
 void  Planet::get_location( long double &x, long double &y )
 {
-    x = 0;
-    y = 0;
     if(NULL !=  parent)
     {
-        char name[1000];
-        parent->get_planet_name(name);
-        parent -> get_location(x,y);
+        parent->get_location(x,y);
+        x += (orbital_r*cos(M_PI*(theta+parent->theta)/180.0));
+        y += (orbital_r*sin(M_PI*(theta+parent->theta)/180.0));
     }
-    x += (orbital_r*cos(M_PI*theta/180));
-    y += (orbital_r*sin(M_PI*theta/180));
+    else
+    {
+        x = (orbital_r*cos(M_PI*theta/180));
+        y = (orbital_r*sin(M_PI*theta/180));
+    }
 }
 
 void Planet::animate()
@@ -120,62 +121,70 @@ void Planet::draw( )
 {
     emissivity[2] = 0;
     // Draw the Planet
-    // First position it around the sun. Use DayOfYear to determine its position.
     glColor3f(1,1,1);
     glMaterialfv( GL_FRONT, GL_AMBIENT, ambient );
     glMaterialfv( GL_FRONT, GL_DIFFUSE, diffuse );
     glMaterialfv( GL_FRONT, GL_SPECULAR, specular );
     glMaterialf( GL_FRONT, GL_SHININESS, shininess );
-    glPushMatrix();
-    glMaterialfv( GL_FRONT, GL_EMISSION, color );
-    //translate to the sun to draw the orbital torus
-    //the torus draws 90 degrees to everything else for some reason
-    glRotatef(90.0,1.0,0.0,0.0);
-    glTranslatef(-orbital_r,0.0,0.0);
-    glutWireTorus(orbital_r,orbital_r,100,1);
-    glPopMatrix();
-    glRotatef( theta, 0.0, 0.0, 1.0 );
-    glTranslatef( orbital_r, 0.0,0.0 );
-    glMaterialfv(GL_FRONT, GL_EMISSION, emissivity); 
-    // Second, rotate the planet on its axis. 
-    glRotatef( phi, 0.0, 0.0, 1.0 );   
-    if( draw_mode == 0)
-    {
-        animate_wire();
-    }
-    else if( draw_mode == 1)
-    {
-        animate_flat();
-    }
-    else if( draw_mode == 2)
-    {
-        animate_smooth();
-    }
-    else
-    {
-        emissivity[2] = 1;
-        if(0 == orbital_r)
-            glMaterialfv(GL_FRONT, GL_EMISSION,emissivity );
-        animate_texture();
-    }
 
+    //draw orbital track--------------
     glPushMatrix();
-    glMaterialfv(GL_FRONT, GL_EMISSION, color);
-    glRotatef( phi, 0, 0, 1 );
-    glTranslatef( 0.0, 0.0, r * 2.0 );
-    glRotatef( 90, 1, 0, 0 );
-    glScalef( 100, 100, 100 );
-    glColor3f( color[0], color[1], color[2] );
-    glutStrokeString(GLUT_STROKE_ROMAN, (const unsigned char *)planet_name);
+        glMaterialfv( GL_FRONT, GL_EMISSION, color );
+        //translate to the sun to draw the orbital torus
+        //the torus draws 90 degrees to everything else for some reason
+        glRotatef(90.0,1.0,0.0,0.0);
+        glTranslatef(-orbital_r,0.0,0.0);
+        glutWireTorus(orbital_r,orbital_r,100,1);
     glPopMatrix();
+    //--------------------------------
 
+    //place planet--------------------------------
     glPushMatrix();
-    for( int i = 0; i < allocated_moons; i++)
-    {
-        moons[i]->draw();
-        glPopMatrix();
+        glRotatef( theta, 0.0, 0.0, 1.0 );
+        glTranslatef( orbital_r, 0.0,0.0 );
+        glMaterialfv(GL_FRONT, GL_EMISSION, emissivity); 
+        // Second, rotate the planet on its axis.
         glPushMatrix();
-    }
+            glRotatef( phi, 0.0, 0.0, 1.0 );   
+            if( draw_mode == 0)
+            {
+                animate_wire();
+            }
+            else if( draw_mode == 1)
+            {
+                animate_flat();
+            }
+            else if( draw_mode == 2)
+            {
+                animate_smooth();
+            }
+            else
+            {
+                emissivity[2] = 1;
+                if(0 == orbital_r)
+                    glMaterialfv(GL_FRONT, GL_EMISSION,emissivity );
+                animate_texture();
+            }
+        glPopMatrix();
+        
+        //draw text----------------------
+        glPushMatrix();
+            glMaterialfv(GL_FRONT, GL_EMISSION, color);
+            glRotatef( phi, 0, 0, 1 );
+            glTranslatef( 0.0, 0.0, r * 2.0 );
+            glRotatef( 90, 1, 0, 0 );
+            glScalef( 100, 100, 100 );
+            glColor3f( color[0], color[1], color[2] );
+            glutStrokeString(GLUT_STROKE_ROMAN, (const unsigned char *)planet_name);
+        glPopMatrix();
+        //------------------------------
+
+        glPushMatrix();
+        for( int i = 0; i < allocated_moons; i++)
+        {
+            moons[i]->draw();
+        }
+        glPopMatrix();
     glPopMatrix();
 }
 
