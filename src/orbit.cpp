@@ -510,6 +510,7 @@ void OpenGLInit( void )
     glEnable( GL_NORMALIZE );   // automatic normalization of normals
     glEnable( GL_CULL_FACE );   // eliminate backfacing polygons
     glEnable( GL_LIGHTING ) ;
+    glEnable(GL_COLOR_MATERIAL); 
     
     glShadeModel( GL_FLAT );
     glClearColor( 0.0, 0.0, 0.0, 0.0 );
