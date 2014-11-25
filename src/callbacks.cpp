@@ -1,5 +1,13 @@
+/******************************************************************************
+ * File: callbacks.cpp
+ * Authors: Ian Carlson, Chris Smith
+ * Date: 11/24/14
+ * Description: Contains the definition for the callback functions for solar
+ * ***************************************************************************/
 #include "../include/callbacks.h"
 
+
+//Global variables from orbit.cpp that we need access to
 extern bool left_dragging;
 extern int ScreenHeight;
 extern int ScreenWidth;
@@ -10,30 +18,56 @@ extern Planet ** planets;
 extern bool paused;
 extern int num_planets;
 
+/******************************************************************************
+ * Function drag
+ * Parameters: x,y location the mouse was dragged to
+ * Returns: none
+ * Description: Handle mouse drags. If the user is dragging the mouse with
+ *  the left button held down, we want to pitch and/or yaw the view accordingly
+ *  **************************************************************************/
 void drag(int x, int y)
 {
+    //if they aren't holding down the left mouse button, return
     if(!left_dragging)
         return;
+
+    //flip from screen to gl coordinates
     y = ScreenHeight - y;
+
+    //calculate the difference between this and the last point
     double x_diff = x - last_click_x;
     double y_diff = y - last_click_y;
-    if(y_diff >= 1 || y_diff <= -1)
-        rotate_pitch(-y_diff/100.0);
-    if(x_diff >= 1 || x_diff <= -1)
-        rotate_yaw(-x_diff/100.0);
+    //rotate by the difference the /100 was what we found gave an
+    //intuitive feel on the op lab machines
+    rotate_pitch(-y_diff/100.0);
+    rotate_yaw(-x_diff/100.0);
+
+    //update the last clicked spot
     last_click_x = x;
     last_click_y = y;
 }
-//When the user clicks, set the position in the last_pos var so we can
-//know where they're going if they drag
+
+/******************************************************************************
+ * Function click
+ * Parameters:
+ *  button - which button was clicked
+ *  state - whether the button was pressed or released
+ *  x,y - location the mouse was clicked
+ * Returns: none
+ * Description: Handle mouse clicks including the scroll wheel and left mouse
+ *  clicks.
+ *  **************************************************************************/
 void click( int button, int state, int x, int y )
 {
-    //only for clicks on the left mouse button
+    //convert screen to gl coordinates
+    y = ScreenHeight - y;
+
+    //If the user clicks the left mouse button, they may be about to drag,
+    //prepare for it
     if(button == GLUT_LEFT_BUTTON)
     {
         if(state == GLUT_DOWN)
         {
-            y = ScreenHeight - y;
             last_click_x = x;
             last_click_y = y;
             left_dragging = true;
@@ -58,26 +92,27 @@ void click( int button, int state, int x, int y )
     {
         if(state == GLUT_DOWN)
         {
+            //zoom out
+            //zooming doesn't make sense when there's no locked target
             if(target_lock == NULL)
                 return;
             zoom(-ZOOM_COEFF);
         }
     }
 }
+
 /******************************************************************************
 * Function: keyboard( unsigned chart key, int x, int y )
 * Authors: Ian Carlson, Christopher Smith
-* Description: Handles the normal key presses for pong
+* Description: Handles keyboard events
 * Arguments:
 *   key: code of the key that was pressed
 *   x: x coordinate the key was pressed at
 *   y: y coordinate the key was pressed at
 * ****************************************************************************/
-
-// callback function that tells OpenGL how to handle keystrokes
 void keyboard( unsigned char key, int x, int y )
 {
-    // correct for upside-down screen coordinates
+    //flip to gl coordinates
     y = ScreenHeight - y;
     switch(key)
     {
@@ -105,6 +140,7 @@ void keyboard( unsigned char key, int x, int y )
         case 'Q':
             rotate_roll(-ROTATE_COEFF);
             break;
+        //increase simulation speed
         case '+':
         case '=':
             Planet::increment_time_step(TIME_STEP_COEFF);
@@ -123,9 +159,12 @@ void keyboard( unsigned char key, int x, int y )
             for(int i = 0; i < num_planets; i++)
                 planets[i]->animate();
             break;
+
+            //increase the planet resolution
         case '*':
             Planet::increment_wire_res();
             break;
+            //decrease the planet resolution
         case '/':
             Planet::decrement_wire_res();
             break;
