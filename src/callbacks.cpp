@@ -14,12 +14,13 @@ extern int ScreenWidth;
 extern double last_click_x;
 extern double last_click_y;
 extern Planet * target_lock;
-extern Planet ** planets; 
+extern Planet ** planets;
 extern bool paused;
 extern int num_planets;
 
 /******************************************************************************
  * Function drag
+ * Authors: Ian Carlson, Chris Smith
  * Parameters: x,y location the mouse was dragged to
  * Returns: none
  * Description: Handle mouse drags. If the user is dragging the mouse with
@@ -49,6 +50,7 @@ void drag(int x, int y)
 
 /******************************************************************************
  * Function click
+ * Authors: Ian Carlson, Chris Smith
  * Parameters:
  *  button - which button was clicked
  *  state - whether the button was pressed or released
@@ -104,11 +106,12 @@ void click( int button, int state, int x, int y )
 /******************************************************************************
 * Function: keyboard( unsigned chart key, int x, int y )
 * Authors: Ian Carlson, Christopher Smith
-* Description: Handles keyboard events
-* Arguments:
+* Parameters:
 *   key: code of the key that was pressed
 *   x: x coordinate the key was pressed at
 *   y: y coordinate the key was pressed at
+* Returns: none
+* Description: Handles keyboard events
 * ****************************************************************************/
 void keyboard( unsigned char key, int x, int y )
 {
@@ -116,79 +119,100 @@ void keyboard( unsigned char key, int x, int y )
     y = ScreenHeight - y;
     switch(key)
     {
-        case 'a':
-        case 'A':
-            move_left(TRANSLATE_COEFF);
-            break;
-        case 'w':
-        case 'W':
-            move_up(TRANSLATE_COEFF);
-            break;
-        case 'd':
-        case 'D':
-            move_left(-TRANSLATE_COEFF);
-            break;
-        case 's':
-        case 'S':
-            move_up(-TRANSLATE_COEFF);
-            break;
-        case 'e':
-        case 'E':
-            rotate_roll(ROTATE_COEFF);
-            break;
-        case 'q':
-        case 'Q':
-            rotate_roll(-ROTATE_COEFF);
-            break;
-        //increase simulation speed
-        case '+':
-        case '=':
-            Planet::increment_time_step(TIME_STEP_COEFF);
-            break;
-        case '-':
-            Planet::increment_time_step(-TIME_STEP_COEFF);
-            break;
-        case 'p':
-        case 'P':
-            paused = !paused;
-            break;
-        case 't':
-        case 'T':
-            paused = true;
-            //take one timestep forward
-            for(int i = 0; i < num_planets; i++)
-                planets[i]->animate();
-            break;
+    case 'a':
+    case 'A':
+        move_left(TRANSLATE_COEFF);
+        break;
+    case 'w':
+    case 'W':
+        move_up(TRANSLATE_COEFF);
+        break;
+    case 'd':
+    case 'D':
+        move_left(-TRANSLATE_COEFF);
+        break;
+    case 's':
+    case 'S':
+        move_up(-TRANSLATE_COEFF);
+        break;
+    case 'e':
+    case 'E':
+        rotate_roll(ROTATE_COEFF);
+        break;
+    case 'q':
+    case 'Q':
+        rotate_roll(-ROTATE_COEFF);
+        break;
+    //increase simulation speed
+    case '+':
+    case '=':
+        Planet::increment_time_step(TIME_STEP_COEFF);
+        break;
+    case '-':
+        Planet::increment_time_step(-TIME_STEP_COEFF);
+        break;
+    case 'p':
+    case 'P':
+        paused = !paused;
+        break;
+    case 't':
+    case 'T':
+        paused = true;
+        //take one timestep forward
+        for(int i = 0; i < num_planets; i++)
+            planets[i]->animate();
+        break;
 
-            //increase the planet resolution
-        case '*':
-            Planet::increment_wire_res();
-            break;
-            //decrease the planet resolution
-        case '/':
-            Planet::decrement_wire_res();
-            break;
+    //increase the planet resolution
+    case '*':
+        Planet::increment_wire_res();
+        break;
+    //decrease the planet resolution
+    case '/':
+        Planet::decrement_wire_res();
+        break;
     }
 }
 
+/******************************************************************************
+* Function: special_keyboard( unsigned chart key, int x, int y )
+* Authors: Ian Carlson, Christopher Smith
+* Paremeters:
+*   key: code of the key that was pressed
+*   x: x coordinate the key was pressed at
+*   y: y coordinate the key was pressed at
+* Returns: none
+* Description: Handles fancy keyboard events
+* ****************************************************************************/
 void special_keyboard( int key, int x, int y)
 {
+    //flip to gl coordinates
     y = ScreenHeight -y;
 
     switch(key)
     {
-    case GLUT_KEY_PAGE_UP:
-        zoom(ZOOM_COEFF);
-        break;
-    case GLUT_KEY_PAGE_DOWN:
-        zoom(-ZOOM_COEFF);
-        break;
+        //alternate method for zooming in
+        case GLUT_KEY_PAGE_UP:
+            zoom(ZOOM_COEFF);
+            break;
+        //alternate method for zooming out
+        case GLUT_KEY_PAGE_DOWN:
+            zoom(-ZOOM_COEFF);
+            break;
     }
 }
 
 
 
-// ResizeWindow is called when the window is resized
+/******************************************************************************
+* Function: ResizeWindow
+* Authors: Ian Carlson, Christopher Smith
+*   Note: this is pretty much exactly Dr. Weiss's code from renderDemo.cpp
+* Parameters:
+*   w,h new screen dimensions in pixels
+* Returns: none
+* Description: Handles window resizes
+* ****************************************************************************/
 void ResizeWindow( int w, int h )
 {
     float aspectRatio;
@@ -199,7 +223,7 @@ void ResizeWindow( int w, int h )
     glViewport( 0, 0, w, h );   // View port uses whole window
     aspectRatio = ( float ) w / ( float ) h;
 
-    // Set up the projection view matrix (not very well!)
+    // Set up the projection view matrix
     glMatrixMode( GL_PROJECTION );
     glLoadIdentity();
     gluPerspective( 30.0, aspectRatio, 1000.0, 200000000.0 );

@@ -91,11 +91,11 @@ void Animate( void )
     gluLookAt(CameraPos.ey_x,CameraPos.ey_y,CameraPos.ey_z,
               CameraPos.at_x,CameraPos.at_y,CameraPos.at_z,
               CameraPos.up_x,CameraPos.up_y,CameraPos.up_z);
-    
+
     //Hardcoded the sun's light source to always be at 0,0,0
     GLfloat light_position[] = { 0, 0, 0, 1.0 };
     glLightfv( GL_LIGHT0, GL_POSITION, light_position );
-    
+
     //draw all of the planets
     for(int i = 0; i < num_planets; i++)
     {
@@ -130,23 +130,23 @@ void OpenGLInit( void )
     GLfloat light_ambient[] = { 0, 0, 0, 1.0 };
     GLfloat light_diffuse[] = { 1, 1, 1, 1.0 };
     GLfloat light_specular[] = { 1, 1, 1, 1.0 };
-   
+
     //enable the only light source, the sun and set its properties
     glEnable(GL_LIGHT0);
     glLightfv( GL_LIGHT0, GL_AMBIENT, light_ambient );
     glLightfv( GL_LIGHT0, GL_DIFFUSE, light_diffuse );
     glLightfv( GL_LIGHT0, GL_SPECULAR, light_specular );
-    
+
     glEnable( GL_DEPTH_TEST );  // enable depth buffer for hidden-surface elimination
     glEnable( GL_NORMALIZE );   // automatic normalization of normals
     glEnable( GL_CULL_FACE );   // eliminate backfacing polygons
-    
+
     //enable the lighting model
     glEnable( GL_LIGHTING ) ;
 
     //allow coloring surfaces in addition to the lighting model
-    glEnable(GL_COLOR_MATERIAL); 
-    
+    glEnable(GL_COLOR_MATERIAL);
+
     //set background color to black
     glClearColor( 0.0, 0.0, 0.0, 0.0 );
     glClearDepth( 1.0 );
@@ -190,10 +190,10 @@ int main( int argc, char** argv )
     for(int i = 0; i < num_planets; i++)
         get_planet(NULL,in,i);
     fclose(in);
-    
+
     //start off locked on the sun, which is the first planet in the file
     target_lock = planets[0];
-        
+
     //set up our camera variables to a nice default view
     init_camera();
 
@@ -219,7 +219,7 @@ int main( int argc, char** argv )
 /******************************************************************************
  * Function: get_planet
  * Authors: Ian Carlson, Chris Smith
- * Parameters: 
+ * Parameters:
  *  parent - a pointer to the parent planet, if this is a moon
  *  in - a pointer to the input file
  *  planets_index - a little hacky, a pointer to the spot in the planets
@@ -234,9 +234,9 @@ void get_planet(Planet * parent, FILE *& in, int planets_index)
     Planet_Info info;
     //Monster scanf to read in a whole line
     fscanf(in,"%s %Lg %Lg %Lg %Lg %Lg %Lg %Lg %lf %lf %lf %s %d %d",
-            info.name,&info.r,&info.o_r,&info.th,&info.o_v,&info.phi,&info.r_s,
-            &info.t,&info.color[0],&info.color[1],&info.color[2],info.texture,
-            &info.moons, &info.rings);
+           info.name,&info.r,&info.o_r,&info.th,&info.o_v,&info.phi,&info.r_s,
+           &info.t,&info.color[0],&info.color[1],&info.color[2],info.texture,
+           &info.moons, &info.rings);
     //read in another few values if there are rings
     if(info.rings)
         fscanf(in,"%Lg %Lg %s",&info.inner_r, &info.outer_r, info.ring_texture);
@@ -262,7 +262,7 @@ void get_planet(Planet * parent, FILE *& in, int planets_index)
             get_planet(new_parent,in,0);//the index doesn't matter if the parent * is non null
         all_celestial_bodies.push_back(new_parent);
     }
-}    
+}
 
 /******************************************************************************
  * Function: CreateMenus
@@ -296,7 +296,7 @@ void CreateMenus()
     //create the main right-click menu
     glutCreateMenu( MainMenuHandler );
     glutAddSubMenu("Display Method",displaySubMenu);
-    glutAddSubMenu("Jump To",jumpToSubMenu);    
+    glutAddSubMenu("Jump To",jumpToSubMenu);
     glutAddMenuEntry("Unlock Camera",value++);
     glutAttachMenu( GLUT_RIGHT_BUTTON );
 }
@@ -313,13 +313,13 @@ void MainMenuHandler( int item )
 {
     switch ( item )
     {
-        //release the lock on the target planet, if any
-        case 1:
-            target_lock = NULL;
-            break;
-        default:    // should not occur
-            cout << "invalid main menu item " << item << endl;
-            break;
+    //release the lock on the target planet, if any
+    case 1:
+        target_lock = NULL;
+        break;
+    default:    // should not occur
+        cout << "invalid main menu item " << item << endl;
+        break;
     }
 }
 

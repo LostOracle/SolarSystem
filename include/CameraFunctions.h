@@ -12,6 +12,6 @@ void rotate_pitch(double amount);
 void rotate_roll(double amount);
 void rotate_yaw(double amount);
 void init_camera();
-void rotate_about_axis3(double &x, double &y, double &z, 
+void rotate_about_axis3(double &x, double &y, double &z,
                         double x_hat, double y_hat, double z_hat, double rads);
 #endif

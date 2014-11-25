@@ -5,7 +5,7 @@
 * File: Planet.cpp
 * Author: Chris Smith, Ian Carlson
 * Description: Src file that implements the Planet class from the Planet.h
-* As well as the functions that Dr. Weiss created for reading bmp images. 
+* As well as the functions that Dr. Weiss created for reading bmp images.
 * Date: 20 Nov 2014
 ************************************************************************/
 /************************************************************************
@@ -80,7 +80,7 @@ Planet::Planet( Planet_Info &info, Planet* ptr = NULL  ):r(info.r), orbital_r(in
 /************************************************************************
    Function:Planet::Planet
    Author: Chris Smith, Ian Carlson
-   Parameters:None 
+   Parameters:None
    Returns: None
    Description: Deconstructor for the planet class that deallocates memory
  ************************************************************************/
@@ -96,7 +96,7 @@ Planet::~Planet()
    Author: Chris Smith, Ian Carlson
    Parameters: out_str is the name of the planet to be given back to caller
    Returns: None
-   Description:Returns the caller the planet's name 
+   Description:Returns the caller the planet's name
  ************************************************************************/
 void Planet::get_planet_name(char * out_str)
 {
@@ -119,7 +119,7 @@ Planet* Planet::add_moon(Planet_Info &info )
    Function:Planet::get_location
    Author: Chris Smith, Ian Carlson
    Parameters: x,y (in,out) are the x and y locations of the planet to be returned
-   Description: calculates the location of the planet or the moon if it has a parent 
+   Description: calculates the location of the planet or the moon if it has a parent
  ************************************************************************/
 void  Planet::get_location( long double &x, long double &y )
 {
@@ -138,7 +138,7 @@ void  Planet::get_location( long double &x, long double &y )
 /************************************************************************
    Function:Planet::Planet
    Author: Chris Smith, Ian Carlson
-   Parameters: None 
+   Parameters: None
    Returns: None
    Description: Calculates the location for the planets at next time step
  ************************************************************************/
@@ -152,8 +152,8 @@ void Planet::animate()
     while( phi > 360 )
         phi -= 360;
 
- for( int i = 0; i < allocated_moons; i++ ) 
-    moons[i]->animate();
+    for( int i = 0; i < allocated_moons; i++ )
+        moons[i]->animate();
 
 
 
@@ -161,7 +161,7 @@ void Planet::animate()
 /************************************************************************
    Function:Planet::draw
    Author: Chris Smith, Ian Carlson
-   Parameters:None 
+   Parameters:None
    Returns: None
    Description: Draws the planets and then the corresponding shading model
  ************************************************************************/
@@ -177,62 +177,62 @@ void Planet::draw( )
 
     //draw orbital track--------------
     glPushMatrix();
-        glMaterialfv( GL_FRONT, GL_EMISSION, color );
-        //translate to the sun to draw the orbital torus
-        //the torus draws 90 degrees to everything else for some reason
-        glRotatef(90.0,1.0,0.0,0.0);
-        glTranslatef(-orbital_r,0.0,0.0);
-        glutWireTorus(orbital_r,orbital_r,100,1);
+    glMaterialfv( GL_FRONT, GL_EMISSION, color );
+    //translate to the sun to draw the orbital torus
+    //the torus draws 90 degrees to everything else for some reason
+    glRotatef(90.0,1.0,0.0,0.0);
+    glTranslatef(-orbital_r,0.0,0.0);
+    glutWireTorus(orbital_r,orbital_r,100,1);
     glPopMatrix();
     //--------------------------------
 
     //place planet--------------------------------
     glPushMatrix();
-        glRotatef( theta, 0.0, 0.0, 1.0 );
-        glTranslatef( orbital_r, 0.0,0.0 );
-        glMaterialfv(GL_FRONT, GL_EMISSION, emissivity); 
-        // Second, rotate the planet on its axis.
-        glPushMatrix();
-            glRotatef( phi, 0.0, 0.0, 1.0 );   
-            if( draw_mode == 0)
-            {
-                animate_wire();
-            }
-            else if( draw_mode == 1)
-            {
-                animate_flat();
-            }
-            else if( draw_mode == 2)
-            {
-                animate_smooth();
-            }
-            else
-            {
-                emissivity[2] = 1;
-                if(0 == orbital_r)
-                    glMaterialfv(GL_FRONT, GL_EMISSION,emissivity );
-                animate_texture();
-            }
-        glPopMatrix();
-        
-        //draw text----------------------
-        glPushMatrix();
-            glMaterialfv(GL_FRONT, GL_EMISSION, color);
-            glRotatef( phi, 0, 0, 1 );
-            glTranslatef( 0.0, 0.0, r * 2.0 );
-            glRotatef( 90, 1, 0, 0 );
-            glScalef( 100, 100, 100 );
-            glColor3f( color[0], color[1], color[2] );
-            glutStrokeString(GLUT_STROKE_ROMAN, (const unsigned char *)planet_name);
-        glPopMatrix();
-        //------------------------------
+    glRotatef( theta, 0.0, 0.0, 1.0 );
+    glTranslatef( orbital_r, 0.0,0.0 );
+    glMaterialfv(GL_FRONT, GL_EMISSION, emissivity);
+    // Second, rotate the planet on its axis.
+    glPushMatrix();
+    glRotatef( phi, 0.0, 0.0, 1.0 );
+    if( draw_mode == 0)
+    {
+        animate_wire();
+    }
+    else if( draw_mode == 1)
+    {
+        animate_flat();
+    }
+    else if( draw_mode == 2)
+    {
+        animate_smooth();
+    }
+    else
+    {
+        emissivity[2] = 1;
+        if(0 == orbital_r)
+            glMaterialfv(GL_FRONT, GL_EMISSION,emissivity );
+        animate_texture();
+    }
+    glPopMatrix();
 
-        glPushMatrix();
-        for( int i = 0; i < allocated_moons; i++)
-        {
-            moons[i]->draw();
-        }
-        glPopMatrix();
+    //draw text----------------------
+    glPushMatrix();
+    glMaterialfv(GL_FRONT, GL_EMISSION, color);
+    glRotatef( phi, 0, 0, 1 );
+    glTranslatef( 0.0, 0.0, r * 2.0 );
+    glRotatef( 90, 1, 0, 0 );
+    glScalef( 100, 100, 100 );
+    glColor3f( color[0], color[1], color[2] );
+    glutStrokeString(GLUT_STROKE_ROMAN, (const unsigned char *)planet_name);
+    glPopMatrix();
+    //------------------------------
+
+    glPushMatrix();
+    for( int i = 0; i < allocated_moons; i++)
+    {
+        moons[i]->draw();
+    }
+    glPopMatrix();
     glPopMatrix();
 }
 /************************************************************************
@@ -241,7 +241,7 @@ void Planet::draw( )
    Description: Constructor for the planet class that takes an Planet info argument and a Ptr argument
    Parameters: new_time_step - value to set the time step to
    Returns: None
-   Description: sets the time step 
+   Description: sets the time step
  ************************************************************************/
 void Planet::set_time_step( const long double &new_time_step )
 {
@@ -280,7 +280,7 @@ char Planet::get_draw_mode()
 /************************************************************************
    Function:Planet::animate_wire
    Author: Chris Smith, Ian Carlson
-   Parameters:None 
+   Parameters:None
    Returns: None
    Description: Draws the planet with wires and flat shading
  ************************************************************************/
@@ -297,14 +297,14 @@ void Planet::animate_wire()
         glColor3fv(color);
         gluQuadricDrawStyle( ring_obj, GLU_FILL );
         gluQuadricNormals( ring_obj, GLU_FLAT);
-        gluDisk( ring_obj,inner_r, outer_r,wire_res,wire_res); 
+        gluDisk( ring_obj,inner_r, outer_r,wire_res,wire_res);
         glEnable(GL_CULL_FACE);
     }
 }
 /************************************************************************
    Function:Planet::animate_flat
    Author: Chris Smith, Ian Carlson
-   Parameters: None 
+   Parameters: None
    Returns: None
    Description: Draws the planet with flat shading
  ************************************************************************/
@@ -323,7 +323,7 @@ void Planet::animate_flat()
         glColor3fv(color);
         gluQuadricDrawStyle( ring_obj, GLU_FILL );
         gluQuadricNormals( ring_obj, GLU_FLAT);
-        gluCylinder( ring_obj,inner_r, outer_r,1,wire_res,wire_res); 
+        gluCylinder( ring_obj,inner_r, outer_r,1,wire_res,wire_res);
         glEnable( GL_CULL_FACE );
     }
 }
@@ -331,7 +331,7 @@ void Planet::animate_flat()
    Function:Planet::animate_smooth
    Author: Chris Smith, Ian Carlson
    Description: Constructor for the planet class that takes an Planet info argument and a Ptr argument
-   Parameters:None 
+   Parameters:None
    Returns: None
    Description: Draws the planet with smooth shading
  ************************************************************************/
@@ -350,7 +350,7 @@ void Planet::animate_smooth()
         glColor3fv(color);
         gluQuadricDrawStyle( ring_obj, GLU_FILL );
         gluQuadricNormals( ring_obj, GLU_SMOOTH);
-        gluCylinder( ring_obj,inner_r, outer_r,1,wire_res,wire_res); 
+        gluCylinder( ring_obj,inner_r, outer_r,1,wire_res,wire_res);
         glEnable( GL_CULL_FACE );
     }
 }
@@ -364,7 +364,7 @@ void Planet::animate_smooth()
  ************************************************************************/
 void Planet::animate_texture()
 {
-    glShadeModel( GL_SMOOTH );   
+    glShadeModel( GL_SMOOTH );
 
     glEnable(GL_TEXTURE_2D);
     // Pixel alignment: each row is word aligned (aligned to a 4 byte boundary)
@@ -374,7 +374,7 @@ void Planet::animate_texture()
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
     gluBuild2DMipmaps( GL_TEXTURE_2D, GL_RGB, texture_cols, texture_rows, GL_RGB, GL_UNSIGNED_BYTE, image );
-    
+
 // generate GLU quadric sphere with surface normals and texture coordinates
     sphere = gluNewQuadric( );
     gluQuadricDrawStyle( sphere, GLU_FILL );
@@ -393,7 +393,7 @@ void Planet::animate_texture()
         glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
         glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
         gluBuild2DMipmaps( GL_TEXTURE_2D, GL_RGB, ring_cols, ring_rows, GL_RGB, GL_UNSIGNED_BYTE, ring_image );
-        
+
         ring_obj = gluNewQuadric();
         glColor3fv(color);
         gluQuadricDrawStyle( ring_obj, GLU_FILL );
@@ -455,7 +455,7 @@ long double Planet::get_radius()
                ImagePtr - points to the image and stores in memory
    Returns: bool succeful read of file
    Description: Reads in a bmp image file and stores it in memory
- ************************************************************************/  
+ ************************************************************************/
 bool LoadBmpFile( const char* filename, int &NumRows, int &NumCols, unsigned char* &ImagePtr )
 {
     FILE* infile = fopen( filename, "rb" );     // Open for reading binary data
@@ -469,7 +469,7 @@ bool LoadBmpFile( const char* filename, int &NumRows, int &NumCols, unsigned cha
     int bChar = fgetc( infile );
     int mChar = fgetc( infile );
     if ( bChar == 'B' && mChar == 'M' )
-    {           // If starts with "BM" for "BitMap"
+    {   // If starts with "BM" for "BitMap"
         skipChars( infile, 4 + 2 + 2 + 4 + 4 );         // Skip 4 fields we don't care about
         NumCols = readLong( infile );
         NumRows = readLong( infile );
