@@ -69,9 +69,10 @@ class Planet
             char planet_name[128];
             long double x, y, z;                   
             //Lighting reflections 
-            double diffuse[3];
-            double specular[3];
-
+            GLfloat diffuse[4];
+            GLfloat specular[4];
+            GLfloat ambient[4];
+            GLfloat shininess;
             //animation functions for setting OpenGL variables
             //and draw modes
             void animate_wire();

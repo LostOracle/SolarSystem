@@ -32,6 +32,20 @@ Planet::Planet( Planet_Info &info, Planet* ptr = NULL  ):r(info.r), orbital_r(in
     moons = new Planet* [num_moons];
     allocated_moons = 0;
     parent = ptr;
+
+    ambient[0] = .3;
+    ambient[1] = .3;
+    ambient[2] = .3;
+    ambient[3] = 1;
+    diffuse[0]= 0.6;
+    diffuse[1]= 0.6;
+    diffuse[2]= 0.6;
+    diffuse[3]= 1;
+    specular[0] = .2;
+    specular[1] = .2;
+    specular[2] = .2;
+    specular[3] = 1;
+    shininess = 0;
 }
 
 Planet::~Planet()
@@ -89,6 +103,11 @@ void Planet::draw( )
     // First position it around the sun. Use DayOfYear to determine its position.
     glColor3f(1,1,1);
 
+    glMaterialfv( GL_FRONT, GL_AMBIENT, ambient );
+    glMaterialfv( GL_FRONT, GL_DIFFUSE, diffuse );
+    glMaterialfv( GL_FRONT, GL_SPECULAR, specular );
+    glMaterialf( GL_FRONT, GL_SHININESS, shininess );
+    
     glPushMatrix();
     //translate to the sun to draw the orbital torus
     //the torus draws 90 degrees to everything else for some reason
@@ -164,21 +183,33 @@ char Planet::get_draw_mode()
 
 void Planet::animate_wire()
 {
+    glShade_Model( GL_FLAT );
     // Third, draw the earth as a wireframe sphere.
     glColor3f( color[0], color[1], color[2] );
     glutWireSphere(r,100,100 );
 }
 void Planet::animate_flat()
 {
-
+    glShadeModel( GL_FLAT );
+    sphere = gluNewQuadric( );
+    glColor3f( color[0], color[1], color[2] );
+    gluQuadricDrawStyle( sphere, GLU_FILL );
+    gluQuadricNormals( sphere, GLU_FLAT );
+    gluSphere( sphere, r, 64, 64 );
 }
 void Planet::animate_smooth()
 {
-
+    glShadeModel( GL_SMOOTH );
+    sphere = gluNewQuadric( );
+    glColor3f( color[0], color[1], color[2] );
+    gluQuadricDrawStyle( sphere, GLU_FILL );
+    gluQuadricNormals( sphere, GLU_SMOOTH );
+    gluSphere( sphere, r, 64, 64 );
 }
 
 void Planet::animate_texture()
-{   
+{
+    glShadeModel( GL_SMOOTH );   
 
     glEnable(GL_TEXTURE_2D);
     // Pixel alignment: each row is word aligned (aligned to a 4 byte boundary)
@@ -194,7 +225,7 @@ void Planet::animate_texture()
     gluQuadricDrawStyle( sphere, GLU_FILL );
     gluQuadricNormals( sphere, GLU_SMOOTH );
     gluQuadricTexture( sphere, GL_TRUE );
-    gluSphere( sphere, this->r, 64, 64 );
+    gluSphere( sphere, r, 64, 64 );
     glDisable(GL_TEXTURE_2D);
 }
 
