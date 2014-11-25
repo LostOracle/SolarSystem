@@ -206,7 +206,7 @@ void Planet::animate_wire()
     glShadeModel( GL_FLAT );
     // Third, draw the earth as a wireframe sphere.
     glColor3f( color[0], color[1], color[2] );
-    glutWireSphere(r,100,100 );
+    glutWireSphere(r,wire_res,wire_res );
     if(rings)
     {
         glDisable( GL_CULL_FACE);
@@ -225,7 +225,7 @@ void Planet::animate_flat()
     glColor3f( color[0], color[1], color[2] );
     gluQuadricDrawStyle( sphere, GLU_FILL );
     gluQuadricNormals( sphere, GLU_FLAT );
-    gluSphere( sphere, r, 64, 64 );
+    gluSphere( sphere, r, wire_res, wire_res );
     if(rings)
     {
         glDisable( GL_CULL_FACE);
@@ -233,7 +233,7 @@ void Planet::animate_flat()
         glColor3fv(color);
         gluQuadricDrawStyle( ring_obj, GLU_FILL );
         gluQuadricNormals( ring_obj, GLU_FLAT);
-        gluCylinder( ring_obj,inner_r, outer_r,1,100,1000); 
+        gluCylinder( ring_obj,inner_r, outer_r,1,wire_res,wire_res); 
         glEnable( GL_CULL_FACE );
     }
 }
@@ -252,7 +252,7 @@ void Planet::animate_smooth()
         glColor3fv(color);
         gluQuadricDrawStyle( ring_obj, GLU_FILL );
         gluQuadricNormals( ring_obj, GLU_SMOOTH);
-        gluCylinder( ring_obj,inner_r, outer_r,1,100,1000); 
+        gluCylinder( ring_obj,inner_r, outer_r,1,wire_res,wire_res); 
         glEnable( GL_CULL_FACE );
     }
 }
@@ -275,7 +275,7 @@ void Planet::animate_texture()
     gluQuadricDrawStyle( sphere, GLU_FILL );
     gluQuadricNormals( sphere, GLU_SMOOTH );
     gluQuadricTexture( sphere, GL_TRUE );
-    gluSphere( sphere, r, 64, 64 );
+    gluSphere( sphere, r, wire_res, wire_res );
     glDisable(GL_TEXTURE_2D);
     if(rings)
     {
@@ -294,7 +294,7 @@ void Planet::animate_texture()
         gluQuadricDrawStyle( ring_obj, GLU_FILL );
         gluQuadricNormals( ring_obj, GLU_SMOOTH);
         gluQuadricTexture(ring_obj, GL_TRUE );
-        gluCylinder( ring_obj,inner_r, outer_r,1,100,1000); 
+        gluCylinder( ring_obj,inner_r, outer_r,1,wire_res,wire_res); 
         glEnable( GL_CULL_FACE );
     }
 }
@@ -305,6 +305,19 @@ void Planet::set_diffuse( const double &r, const double &g, const double &b)
     diffuse[0] = r;
     diffuse[1] = g;
     diffuse[2] = b;
+}
+
+void Planet::increment_wire_res()
+{
+    wire_res +=2;
+    if(wire_res > 200 )
+        wire_res = 200;
+}
+void Planet::decrement_wire_res()
+{
+    wire_res-=2;
+    if( wire_res < 2 )
+        wire_res = 2;
 }
 
 void Planet::set_diffuse( const double new_diffuse[] )
@@ -474,3 +487,4 @@ void skipChars( FILE* infile, int numChars )
 /*******STATIC VARIABLES FOR CLASS**********/
 long double Planet::time_step = 0;
 char Planet::draw_mode = 0;
+double Planet::wire_res = 64;
