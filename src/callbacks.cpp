@@ -17,8 +17,10 @@ void drag(int x, int y)
     y = ScreenHeight - y;
     double x_diff = x - last_click_x;
     double y_diff = y - last_click_y;
-    rotate_pitch(-y_diff/100);
-    rotate_yaw(-x_diff/100);
+    if(y_diff >= 1 || y_diff <= -1)
+        rotate_pitch(-y_diff/100.0);
+    if(x_diff >= 1 || x_diff <= -1)
+        rotate_yaw(-x_diff/100.0);
     last_click_x = x;
     last_click_y = y;
 }

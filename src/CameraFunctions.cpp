@@ -95,14 +95,19 @@ void rotate_yaw(double amount)
     double x = CameraPos.at_x - CameraPos.ey_x;
     double y = CameraPos.at_y - CameraPos.ey_y;
     double z = CameraPos.at_z - CameraPos.ey_z;
+    double mag = sqrt(x*x + y*y + z*z);
+    x = x/mag;
+    y = y/mag;
+    z = z/mag;
+
     //maintain distance, but move eye left or right
     if(target_lock != NULL)
     {
         //invert the ey to at vector and rotate it around
         //the vector 0,0,1
-        x=-x;
-        y=-y;
-        z=-z;
+        x = -x;
+        y = -y;
+        z = -z;
         rotate_about_axis3(x,y,z,
                 CameraPos.up_x,CameraPos.up_y,CameraPos.up_z,
                            amount);
@@ -111,9 +116,9 @@ void rotate_yaw(double amount)
         rotate_about_axis3(CameraPos.lf_x, CameraPos.lf_y, CameraPos.lf_z,
                 CameraPos.up_x,CameraPos.up_y,CameraPos.up_z,
                 amount);
-        CameraPos.ey_x = CameraPos.at_x + x;
-        CameraPos.ey_y = CameraPos.at_y + y;
-        CameraPos.ey_z = CameraPos.at_z + z;
+        CameraPos.ey_x = CameraPos.at_x + x*mag;
+        CameraPos.ey_y = CameraPos.at_y + y*mag;
+        CameraPos.ey_z = CameraPos.at_z + z*mag;
     }
 
     //rotate at and up about left by amount*camera_rotate_coeff
@@ -127,9 +132,9 @@ void rotate_yaw(double amount)
                            CameraPos.up_x,CameraPos.up_y,CameraPos.up_z,
                            amount);
         //reconstruct the actual at from ey + the new vector
-        CameraPos.at_x = CameraPos.ey_x + x;
-        CameraPos.at_y = CameraPos.ey_y + y;
-        CameraPos.at_z = CameraPos.ey_z + z;
+        CameraPos.at_x = CameraPos.ey_x + x*mag;
+        CameraPos.at_y = CameraPos.ey_y + y*mag;
+        CameraPos.at_z = CameraPos.ey_z + z*mag;
     }
 }
 
@@ -138,6 +143,10 @@ void rotate_pitch(double amount)
     double x = CameraPos.at_x - CameraPos.ey_x;
     double y = CameraPos.at_y - CameraPos.ey_y;
     double z = CameraPos.at_z - CameraPos.ey_z;
+    double mag = sqrt(x*x + y*y + z*z);
+    x = x/mag;
+    y = y/mag;
+    z = z/mag;
     //invert x,y,z and rotate that vector about lf then move ey
     if(target_lock != NULL)
     {
@@ -150,9 +159,9 @@ void rotate_pitch(double amount)
         rotate_about_axis3(x,y,z,
                            CameraPos.lf_x,CameraPos.lf_y,CameraPos.lf_z,
                            amount);
-        CameraPos.ey_x = CameraPos.at_x + x;
-        CameraPos.ey_y = CameraPos.at_y + y;
-        CameraPos.ey_z = CameraPos.at_z + z;
+        CameraPos.ey_x = CameraPos.at_x + x*mag;
+        CameraPos.ey_y = CameraPos.at_y + y*mag;
+        CameraPos.ey_z = CameraPos.at_z + z*mag;
                     
     }
     //rotate at and up about left by amount*camera_rotate_coeff
@@ -166,9 +175,9 @@ void rotate_pitch(double amount)
                            CameraPos.lf_x,CameraPos.lf_y,CameraPos.lf_z,
                            amount);
         //reconstruct the actual at from ey + the new vector
-        CameraPos.at_x = CameraPos.ey_x + x;
-        CameraPos.at_y = CameraPos.ey_y + y;
-        CameraPos.at_z = CameraPos.ey_z + z;
+        CameraPos.at_x = CameraPos.ey_x + x*mag;
+        CameraPos.at_y = CameraPos.ey_y + y*mag;
+        CameraPos.at_z = CameraPos.ey_z + z*mag;
     }
 }
 
