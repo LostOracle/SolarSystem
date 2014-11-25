@@ -468,10 +468,10 @@ void rotate_about_axis3(double &x, double &y, double &z,
 // Initialize OpenGL's rendering modes
 void OpenGLInit( void )
 {
-    glShadeModel( GL_FLAT );
+    //glShadeModel( GL_FLAT );
     glClearColor( 0.0, 0.0, 0.0, 0.0 );
     glClearDepth( 1.0 );
-    glEnable( GL_DEPTH_TEST );
+    //glEnable( GL_DEPTH_TEST );
     glutKeyboardFunc( keyboard );
     glutKeyboardUpFunc( keyboardUp);
     glutSpecialFunc(special_keyboard);
@@ -529,22 +529,25 @@ int main( int argc, char** argv )
     glutInit( &argc, argv );
     glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
 
-    glEnable( GL_DEPTH_TEST );  // enable depth buffer for hidden-surface elimination
-    glEnable( GL_NORMALIZE );   // automatic normalization of normals
-    glEnable( GL_CULL_FACE );   // eliminate backfacing polygons
-    glCullFace( GL_BACK );
     
 // specify light source properties
-    GLfloat light_position[] = { 10.0, 10.0, 10.0, 1.0 };
-    GLfloat light_ambient[] = { 0.4, 0.4, 0.4, 1.0 };       // ambient light
+    GLfloat light_position[] = { 0, 0, 1, 0.0 };
+    GLfloat light_ambient[] = { 0.0, 0.0, 0.0, 1.0 };       // ambient light
     GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };       // diffuse light
     GLfloat light_specular[] = { 1.0, 1.0, 1.0, 1.0 };      // highlights
-
-    glEnable( GL_LIGHT0 );      // enable one light source
+    
     glLightfv( GL_LIGHT0, GL_POSITION, light_position );
     glLightfv( GL_LIGHT0, GL_AMBIENT, light_ambient );
     glLightfv( GL_LIGHT0, GL_DIFFUSE, light_diffuse );
     glLightfv( GL_LIGHT0, GL_SPECULAR, light_specular );
+    
+    glEnable( GL_LIGHT0 );      // enable one light source
+    
+    glEnable( GL_DEPTH_TEST );  // enable depth buffer for hidden-surface elimination
+    glEnable( GL_NORMALIZE );   // automatic normalization of normals
+    glEnable( GL_CULL_FACE );   // eliminate backfacing polygons
+    glEnable( GL_LIGHTING ) ;
+    glDisable(GL_COLOR_MATERIAL);
 
     // Create and position the graphics window
     glutInitWindowPosition( 0, 0 );
