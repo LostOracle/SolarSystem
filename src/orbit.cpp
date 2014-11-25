@@ -298,6 +298,13 @@ void CreateMenus()
     glutAddSubMenu("Display Method",displaySubMenu);
     glutAddSubMenu("Jump To",jumpToSubMenu);
     glutAddMenuEntry("Unlock Camera",value++);
+    glutAddMenuEntry("Increase Timestep(+)",value++);
+    glutAddMenuEntry("Decrease Timestep(-)",value++);
+    glutAddMenuEntry("Increase Resolution(*)",value++);
+    glutAddMenuEntry("Decrease Resolution(/)",value++);
+    glutAddMenuEntry("Pause/Resume(p)",value++);
+    glutAddMenuEntry("Single Step(t)",value++);
+    glutAddMenuEntry("Help",value++);
     glutAttachMenu( GLUT_RIGHT_BUTTON );
 }
 
@@ -316,6 +323,35 @@ void MainMenuHandler( int item )
     //release the lock on the target planet, if any
     case 1:
         target_lock = NULL;
+        break;
+    case 2:
+        Planet::increment_time_step(TIME_STEP_COEFF);
+        break;
+    case 3:
+        Planet::increment_time_step(-TIME_STEP_COEFF);
+        break;
+    //increase object resolution
+    case 4:
+        Planet::increment_wire_res();
+        break;
+    //decrease objecct resolution
+    case 5:
+        Planet::decrement_wire_res();
+        break;
+    //pause
+    case 6:
+        paused = true;
+        break;
+    //single step
+    case 7:
+        paused = true;
+        //take one timestep forward
+        for(int i = 0; i < num_planets; i++)
+            planets[i]->animate();
+        break;
+    //display readme for detailed help
+    case 8:
+
         break;
     default:    // should not occur
         cout << "invalid main menu item " << item << endl;
