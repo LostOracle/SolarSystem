@@ -45,6 +45,20 @@ Planet::Planet( Planet_Info &info, Planet* ptr = NULL  ):r(info.r), orbital_r(in
     specular[1] = .2;
     specular[2] = .2;
     specular[3] = 1;
+    if( orbital_r == 0)
+    {
+        emissivity[0] = 1;
+        emissivity[1] = 1;
+        emissivity[2] = 1;
+        emissivity[3] = 1;
+    }
+    else
+    {
+        emissivity[0] = 0;
+        emissivity[1] = 0;
+        emissivity[2] = 0;
+        emissivity[3] = 1;
+    }
     shininess = 0;
 }
 
@@ -107,7 +121,7 @@ void Planet::draw( )
     glMaterialfv( GL_FRONT, GL_DIFFUSE, diffuse );
     glMaterialfv( GL_FRONT, GL_SPECULAR, specular );
     glMaterialf( GL_FRONT, GL_SHININESS, shininess );
-    
+    glMaterialfv(GL_FRONT, GL_EMISSION, emissivity); 
     glPushMatrix();
     //translate to the sun to draw the orbital torus
     //the torus draws 90 degrees to everything else for some reason

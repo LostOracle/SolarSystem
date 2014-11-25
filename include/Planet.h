@@ -72,6 +72,7 @@ class Planet
             GLfloat diffuse[4];
             GLfloat specular[4];
             GLfloat ambient[4];
+            GLfloat emissivity[4];
             GLfloat shininess;
             //animation functions for setting OpenGL variables
             //and draw modes
