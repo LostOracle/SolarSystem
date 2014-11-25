@@ -1,10 +1,3 @@
-
-
-/***PLANET DEFINES***/
-#define NUM_PLANETS 9
-
-
-
 /***PLANET DRAW MODES***/
 #define WIRE_DRAW_MODE 0
 #define FLAT_DRAW_MODE 1

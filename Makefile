@@ -36,7 +36,7 @@ VPATH = src
 all:    solar
 
 # specific targets
-solar:	Planet.o orbit.o
+solar:	Planet.o orbit.o CameraFunctions.o
 	$(LINK) -o $@ $^ $(GL_LIBS)
 
 # generic C and C++ targets for OpenGL programs consisting of only one file

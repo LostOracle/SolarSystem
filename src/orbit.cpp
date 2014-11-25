@@ -1,91 +1,21 @@
-#include <cstdlib>
-#include <GL/freeglut.h>
-#include "../include/Planet.h"
-#include <stdio.h>
-#include "../include/Planet_Info.h"
-#include "../include/shared_constants.h"
-#include "../include/Camera_Structs.h"
-#include <iostream>
-#include <math.h>
-#include <vector>
-
-using namespace std;
-void OpenGLInit( void );
-void Animate( void );
-void ResizeWindow( int w, int h );
+#include "../include/solar.h"
 
 // global variables
 double last_click_x = -1;
 double last_click_y = -1;
-GLenum spinMode = GL_TRUE;
-GLenum singleStep = GL_FALSE;
-float HourOfDay = 0.0;
-float DayOfYear = 0.0;
-float AnimateIncrement = 24.0;  // animation time step (hours)
 int num_planets;
 bool left_dragging = false;
-
+bool paused = false;
 Planet ** planets;
 vector<Planet *> all_celestial_bodies;
 Planet * target_lock;
 //Some handy mouse handling constants provided by Dr. Weiss
-const int MouseButtonPress	= 0;
-const int MouseButtonRelease= 1;
-const int MouseLeftButton	= 0;
-const int MouseMiddleButton	= 1; //unused
-const int MouseRightButton	= 1; //unused
-
 camera_position CameraPos;
 camera_velocity CameraVel;
 
-double camera_translate_coeff = 100;
-double camera_rotate_coeff = .2;
-double time_step_coeff = 10;
-// Animate() handles the animation and the redrawing of the graphics window contents.
-void keyboard( unsigned char key, int x, int y );
-void special_keyboard( int key, int x, int y);
-void keyboardUp( unsigned char key, int x, int y );
-void rotate_about_axis3(double &x, double &y, double &z, 
-                        double x_hat, double y_hat, double z_hat, double rads);
-void SubMenuHandler( int item );
-void MainMenuHandler( int item );
-void zoom(double amount);
-void CreateMenus();
-void move_left(double amount);
-void move_up(double amount);
-void move_forward(double amount);
-void rotate_pitch(double amount);
-void rotate_roll(double amount);
-void rotate_yaw(double amount);
-void get_planet(Planet * parent, FILE *& in, int planets_index);
-void click( int button, int state, int x, int y );
-void displaySubMenuHandler( int item );
-void jumpToSubMenuHandler( int item );
 int ScreenWidth  = 600;
 int ScreenHeight = 600;
 
-void init_camera()
-{
-    CameraPos.ey_x = 0;
-    CameraPos.ey_y = 0;
-    CameraPos.ey_z = 1000000;
-    CameraPos.at_x = 0;
-    CameraPos.at_y = 0;
-    CameraPos.at_z = -1;
-    CameraPos.up_x = 1;
-    CameraPos.up_y = 0;
-    CameraPos.up_z = 0;
-    CameraPos.lf_x = 0;
-    CameraPos.lf_y = 1;
-    CameraPos.lf_z = 0;
-
-    CameraVel.x = 0;
-    CameraVel.y = 0;
-    CameraVel.z = 0;
-    CameraVel.roll = 0;
-    CameraVel.pitch = 0;
-    CameraVel.yaw = 0;
-}
 
 void Animate( void )
 {
@@ -93,8 +23,9 @@ void Animate( void )
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     //update the positions of the planets
-    for(int i = 0; i < NUM_PLANETS; i++)
-        planets[i]->animate();
+    if(!paused)
+        for(int i = 0; i < num_planets; i++)
+            planets[i]->animate();
 
     //track the target planet, if any
     if(target_lock != NULL)
@@ -121,7 +52,7 @@ void Animate( void )
               CameraPos.up_x,CameraPos.up_y,CameraPos.up_z);
     GLfloat light_position[] = { 0, 0, 0, 1.0 };
     glLightfv( GL_LIGHT0, GL_POSITION, light_position );
-    for(int i = 0; i < NUM_PLANETS; i++)
+    for(int i = 0; i < num_planets; i++)
     {
         glPushMatrix();
         planets[i]->draw();
@@ -176,39 +107,25 @@ void click( int button, int state, int x, int y )
         if(state == GLUT_DOWN)
         {
             //zoom in
-            zoom(0.05);
-            cout << "Zoom in" << endl;
+            //zooming doesn't make sense when there's no locked target
+            if(target_lock == NULL)
+                return;
+            zoom(zoom_amount);
         }
     }
     else if(button == 4)
     {
         if(state == GLUT_DOWN)
         {
-            zoom(-0.05);
-            cout << "zoom out" << endl;
+            if(target_lock == NULL)
+                return;
+            zoom(-zoom_amount);
         }
     }
     else
         cout << "button: " << button << "state: " << state << endl;
 }
 
-void zoom(double amount)
-{
-    //zooming doesn't make sense when there's no locked target
-    if(target_lock == NULL)
-        return;
-    //move 5% closer to the target object, if any
-    long double x,y,z;
-    x = CameraPos.ey_x - CameraPos.at_x;
-    y = CameraPos.ey_y - CameraPos.at_y;
-    z = CameraPos.ey_z - CameraPos.at_z;
-    x = (1-amount)*x;
-    y = (1-amount)*y;
-    z = (1-amount)*z;
-    CameraPos.ey_x = CameraPos.at_x + x;
-    CameraPos.ey_y = CameraPos.at_y + y;
-    CameraPos.ey_z = CameraPos.at_z + z;
-}
 
 void drag(int x, int y)
 {
@@ -271,8 +188,18 @@ void keyboard( unsigned char key, int x, int y )
         case '-':
             Planet::increment_time_step(-time_step_coeff);
             break;
+        case 'p':
+        case 'P':
+            paused = !paused;
+            break;
+        case 't':
+        case 'T':
+            paused = true;
+            //take one timestep forward
+            for(int i = 0; i < num_planets; i++)
+                planets[i]->animate();
+            break;
     }
-
 }
 
 void special_keyboard( int key, int x, int y)
@@ -283,189 +210,14 @@ void special_keyboard( int key, int x, int y)
     switch(key)
     {
     case GLUT_KEY_PAGE_UP:
-        move_forward(camera_translate_coeff);
+        zoom(zoom_amount);
         break;
     case GLUT_KEY_PAGE_DOWN:
-        move_forward(-camera_translate_coeff);
+        zoom(-zoom_amount);
         break;
     }
 }
-void move_forward(double amount)
-{
-    //at-ey will give the forward-facing vector, but
-    //we need to normalize it to make sure we're to scale
-    double x,y,z;
-    x = CameraPos.at_x - CameraPos.ey_x;
-    y = CameraPos.at_y - CameraPos.ey_y;
-    z = CameraPos.at_z - CameraPos.ey_z;
-    double mag = x*x + y*y + z*z;
-    mag = sqrt(mag);
-    x/=mag;
-    y/=mag;
-    z/=mag;
-    
-    //now that we have a unit vector for the forward
-    //direction, move along that vector
-    CameraPos.at_x += x*amount;
-    CameraPos.at_y += y*amount;
-    CameraPos.at_z += z*amount;
-    CameraPos.ey_x += x*amount;
-    CameraPos.ey_y += y*amount;
-    CameraPos.ey_z += z*amount;
-}
 
-void move_up(double amount)
-{
-    //update at and eye by amount*lf
-    CameraPos.at_x += amount*CameraPos.up_x;
-    CameraPos.at_y += amount*CameraPos.up_y;
-    CameraPos.at_z += amount*CameraPos.up_z;
-    CameraPos.ey_x += amount*CameraPos.up_x;
-    CameraPos.ey_y += amount*CameraPos.up_y;
-    CameraPos.ey_z += amount*CameraPos.up_z;
-}
-
-void move_left(double amount)
-{
-    //update at and eye by amount*lf
-    CameraPos.at_x += amount*CameraPos.lf_x;
-    CameraPos.at_y += amount*CameraPos.lf_y;
-    CameraPos.at_z += amount*CameraPos.lf_z;
-    CameraPos.ey_x += amount*CameraPos.lf_x;
-    CameraPos.ey_y += amount*CameraPos.lf_y;
-    CameraPos.ey_z += amount*CameraPos.lf_z;
-}
-
-//when the user wants to rotate left/right, we rotate
-//about the up vector, updating the left and at
-//vectors
-void rotate_yaw(double amount)
-{
-    double x = CameraPos.at_x - CameraPos.ey_x;
-    double y = CameraPos.at_y - CameraPos.ey_y;
-    double z = CameraPos.at_z - CameraPos.ey_z;
-    //maintain distance, but move eye left or right
-    if(target_lock != NULL)
-    {
-        //invert the ey to at vector and rotate it around
-        //the vector 0,0,1
-        x=-x;
-        y=-y;
-        z=-z;
-        rotate_about_axis3(x,y,z,
-                CameraPos.up_x,CameraPos.up_y,CameraPos.up_z,
-                           amount*camera_rotate_coeff);
-
-        //also update the left vector
-        rotate_about_axis3(CameraPos.lf_x, CameraPos.lf_y, CameraPos.lf_z,
-                CameraPos.up_x,CameraPos.up_y,CameraPos.up_z,
-                amount*camera_rotate_coeff);
-        CameraPos.ey_x = CameraPos.at_x + x;
-        CameraPos.ey_y = CameraPos.at_y + y;
-        CameraPos.ey_z = CameraPos.at_z + z;
-    }
-
-    //rotate at and up about left by amount*camera_rotate_coeff
-    //extract vector from at - ey
-    else
-    {
-        rotate_about_axis3(x, y, z,
-                           CameraPos.up_x,CameraPos.up_y,CameraPos.up_z,
-                           amount*camera_rotate_coeff);
-        rotate_about_axis3(CameraPos.lf_x, CameraPos.lf_y, CameraPos.lf_z,
-                           CameraPos.up_x,CameraPos.up_y,CameraPos.up_z,
-                           amount*camera_rotate_coeff);
-        //reconstruct the actual at from ey + the new vector
-        CameraPos.at_x = CameraPos.ey_x + x;
-        CameraPos.at_y = CameraPos.ey_y + y;
-        CameraPos.at_z = CameraPos.ey_z + z;
-    }
-}
-
-void rotate_pitch(double amount)
-{
-    double x = CameraPos.at_x - CameraPos.ey_x;
-    double y = CameraPos.at_y - CameraPos.ey_y;
-    double z = CameraPos.at_z - CameraPos.ey_z;
-    //invert x,y,z and rotate that vector about lf then move ey
-    if(target_lock != NULL)
-    {
-        rotate_about_axis3(CameraPos.up_x,CameraPos.up_y,CameraPos.up_z,
-                           CameraPos.lf_x,CameraPos.lf_y,CameraPos.lf_z,
-                           amount*camera_rotate_coeff); 
-        x = -x;
-        y = -y;
-        z = -z;
-        rotate_about_axis3(x,y,z,
-                           CameraPos.lf_x,CameraPos.lf_y,CameraPos.lf_z,
-                           amount*camera_rotate_coeff);
-        CameraPos.ey_x = CameraPos.at_x + x;
-        CameraPos.ey_y = CameraPos.at_y + y;
-        CameraPos.ey_z = CameraPos.at_z + z;
-                    
-    }
-    //rotate at and up about left by amount*camera_rotate_coeff
-    //extract vector from at - ey
-    else
-    {
-        rotate_about_axis3(x, y, z,
-                           CameraPos.lf_x,CameraPos.lf_y,CameraPos.lf_z,
-                           amount*camera_rotate_coeff);
-        rotate_about_axis3(CameraPos.up_x, CameraPos.up_y, CameraPos.up_z,
-                           CameraPos.lf_x,CameraPos.lf_y,CameraPos.lf_z,
-                           amount*camera_rotate_coeff);
-        //reconstruct the actual at from ey + the new vector
-        CameraPos.at_x = CameraPos.ey_x + x;
-        CameraPos.at_y = CameraPos.ey_y + y;
-        CameraPos.at_z = CameraPos.ey_z + z;
-    }
-}
-
-void rotate_roll(double amount)
-{
-    double mag = 0;
-    mag += (CameraPos.at_x-CameraPos.ey_x)*(CameraPos.at_x-CameraPos.ey_x);
-    mag += (CameraPos.at_y-CameraPos.ey_y)*(CameraPos.at_y-CameraPos.ey_y);
-    mag += (CameraPos.at_z-CameraPos.ey_z)*(CameraPos.at_z-CameraPos.ey_z);
-    mag = sqrt(mag);
-
-    //rotate up and left about at by amount*camera_rotate_coeff
-    rotate_about_axis3(CameraPos.lf_x, CameraPos.lf_y, CameraPos.lf_z,
-                       (CameraPos.at_x-CameraPos.ey_x)/mag,
-                       (CameraPos.at_y-CameraPos.ey_y)/mag,
-                       (CameraPos.at_z-CameraPos.ey_z)/mag,
-                       amount*camera_rotate_coeff);
-    rotate_about_axis3(CameraPos.up_x, CameraPos.up_y, CameraPos.up_z,
-                       (CameraPos.at_x-CameraPos.ey_x)/mag,
-                       (CameraPos.at_y-CameraPos.ey_y)/mag,
-                       (CameraPos.at_z-CameraPos.ey_z)/mag,
-                       amount*camera_rotate_coeff);
-}
-void rotate_about_axis3(double &x, double &y, double &z, 
-                        double x_hat, double y_hat, double z_hat, double rads)
-{
-    //http://en.wikipedia.org/wiki/Rotation_matrix#Rotation_matrix_from_axis_and_angle
-    double new_x, new_y, new_z;
-    //don't need to do this a bunch of times
-    double c = cos(rads);
-    double s = sin(rads);
-
-    new_x = x*(c + x_hat*x_hat*(1-c))
-      + y*(x_hat*y_hat*(1-c) - z_hat*s)
-      + z*(x_hat*z_hat*(1-c) + y_hat*s);
-
-    new_y = x*(y_hat*x_hat*(1-c) + z_hat*s)
-      + y*(c + y_hat*y_hat*(1-c))
-      + z*(y_hat*z_hat*(1-c) - x_hat*s);
-
-    new_z = x*(z_hat*x_hat*(1-c) - y_hat*s)
-      + y*(z_hat*y_hat*(1-c) + x_hat*s)
-      + z*(c + z_hat*z_hat*(1-c));
-
-    x = new_x;
-    y = new_y;
-    z = new_z;
-}
 
 
 // ResizeWindow is called when the window is resized
@@ -482,7 +234,7 @@ void ResizeWindow( int w, int h )
     // Set up the projection view matrix (not very well!)
     glMatrixMode( GL_PROJECTION );
     glLoadIdentity();
-    gluPerspective( 30.0, aspectRatio, 1.0, 2000000000.0 );
+    gluPerspective( 30.0, aspectRatio, 1000.0, 200000000.0 );
 
     // Select the Modelview matrix
     glMatrixMode( GL_MODELVIEW );
@@ -512,7 +264,6 @@ void OpenGLInit( void )
     glEnable( GL_LIGHTING ) ;
     glEnable(GL_COLOR_MATERIAL); 
     
-    glShadeModel( GL_FLAT );
     glClearColor( 0.0, 0.0, 0.0, 0.0 );
     glClearDepth( 1.0 );
     glutKeyboardFunc( keyboard );
@@ -523,7 +274,6 @@ void OpenGLInit( void )
     glutReshapeFunc( ResizeWindow );
     glutDisplayFunc( Animate );
     glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
-    CreateMenus();
 }
 
 // Main routine
@@ -542,7 +292,7 @@ int main( int argc, char** argv )
     //create an array of points to that many objects
     planets = new Planet*[num_planets];
 
-    for(int i = 0; i < NUM_PLANETS; i++)
+    for(int i = 0; i < num_planets; i++)
     {
         get_planet(NULL,in,i);
     }
@@ -557,11 +307,12 @@ int main( int argc, char** argv )
 
     // Initialize OpenGL.
     OpenGLInit();
+    CreateMenus();
 
     // Start the main loop.  glutMainLoop never returns.
     glutMainLoop( );
 
-    for(int i = 0; i < NUM_PLANETS; i++)
+    for(int i = 0; i < num_planets; i++)
         delete planets[i];
     delete []planets;
     return 0;
