@@ -49,6 +49,7 @@ class Planet
             int texture_cols;
             unsigned char * image;
             GLUquadricObj* sphere;
+            GLUquadricObj* ring_obj;
             static char draw_mode;
             static long double time_step;
             //planet radius
@@ -64,7 +65,7 @@ class Planet
             //how fast the planet rotates
             long double rotation_s;
             long double tilt;
-            double color[3];
+            float color[3];
             char texture_name[1024];
             char planet_name[128];
             long double x, y, z;                   
@@ -86,6 +87,9 @@ class Planet
             int num_moons;
             int allocated_moons;
             int rings;
+            int ring_cols;
+            int ring_rows;
+            unsigned char* ring_image;
             long double inner_r;
             long double outer_r;
             char ring_texture[1024];

@@ -27,7 +27,10 @@ Planet::Planet( Planet_Info &info, Planet* ptr = NULL  ):r(info.r), orbital_r(in
         inner_r = info.inner_r;
         outer_r = info.outer_r;
         strcpy(ring_texture, info.ring_texture);
-    
+        if(!LoadBmpFile(ring_texture, ring_rows, ring_cols, ring_image))
+        {
+            return;
+        }
     }
     moons = new Planet* [num_moons];
     allocated_moons = 0;
@@ -109,6 +112,8 @@ void Planet::animate()
  for( int i = 0; i < allocated_moons; i++ ) 
     moons[i]->animate();
 
+
+
 }
 
 void Planet::draw( )
@@ -116,22 +121,21 @@ void Planet::draw( )
     // Draw the Planet
     // First position it around the sun. Use DayOfYear to determine its position.
     glColor3f(1,1,1);
-
     glMaterialfv( GL_FRONT, GL_AMBIENT, ambient );
     glMaterialfv( GL_FRONT, GL_DIFFUSE, diffuse );
     glMaterialfv( GL_FRONT, GL_SPECULAR, specular );
     glMaterialf( GL_FRONT, GL_SHININESS, shininess );
-    glMaterialfv(GL_FRONT, GL_EMISSION, emissivity); 
     glPushMatrix();
+    glMaterialfv( GL_FRONT, GL_EMISSION, color );
     //translate to the sun to draw the orbital torus
     //the torus draws 90 degrees to everything else for some reason
     glRotatef(90.0,1.0,0.0,0.0);
     glTranslatef(-orbital_r,0.0,0.0);
-    glutWireTorus(orbital_r-200,orbital_r+200,100,1);
+    glutWireTorus(orbital_r,orbital_r,100,1);
     glPopMatrix();
     glRotatef( theta, 0.0, 0.0, 1.0 );
     glTranslatef( orbital_r, 0.0,0.0 );
-    
+    glMaterialfv(GL_FRONT, GL_EMISSION, emissivity); 
     // Second, rotate the planet on its axis. 
     glRotatef( phi, 0.0, 0.0, 1.0 );   
     if( draw_mode == 0)
@@ -152,6 +156,7 @@ void Planet::draw( )
     }
 
     glPushMatrix();
+    glMaterialfv(GL_FRONT, GL_EMISSION, color);
     glRotatef( phi, 0, 0, 1 );
     glTranslatef( 0.0, 0.0, r * 2.0 );
     glRotatef( 90, 1, 0, 0 );
@@ -202,6 +207,16 @@ void Planet::animate_wire()
     // Third, draw the earth as a wireframe sphere.
     glColor3f( color[0], color[1], color[2] );
     glutWireSphere(r,100,100 );
+    if(rings)
+    {
+        glDisable( GL_CULL_FACE);
+        ring_obj = gluNewQuadric();
+        glColor3fv(color);
+        gluQuadricDrawStyle( ring_obj, GLU_FILL );
+        gluQuadricNormals( ring_obj, GLU_FLAT);
+        gluDisk( ring_obj,inner_r, outer_r,100,1000); 
+        glEnable(GL_CULL_FACE);
+    }
 }
 void Planet::animate_flat()
 {
@@ -211,6 +226,16 @@ void Planet::animate_flat()
     gluQuadricDrawStyle( sphere, GLU_FILL );
     gluQuadricNormals( sphere, GLU_FLAT );
     gluSphere( sphere, r, 64, 64 );
+    if(rings)
+    {
+        glDisable( GL_CULL_FACES);
+        ring_obj = gluNewQuadric();
+        glColor3fv(color);
+        gluQuadricDrawStyle( ring_obj, GLU_FILL );
+        gluQuadricNormals( ring_obj, GLU_FLAT);
+        gluCylinder( ring_obj,inner_r, outer_r,1,100,1000); 
+        glEnable( GL_CULL_FACES);
+    }
 }
 void Planet::animate_smooth()
 {
@@ -220,6 +245,16 @@ void Planet::animate_smooth()
     gluQuadricDrawStyle( sphere, GLU_FILL );
     gluQuadricNormals( sphere, GLU_SMOOTH );
     gluSphere( sphere, r, 64, 64 );
+    if(rings)
+    {
+        glDisable( GL_CULL_FACE );
+        ring_obj = gluNewQuadric();
+        glColor3fv(color);
+        gluQuadricDrawStyle( ring_obj, GLU_FILL );
+        gluQuadricNormals( ring_obj, GLU_SMOOTH);
+        gluCylinder( ring_obj,inner_r, outer_r,1,100,1000); 
+        glEnable( GL_CULL_FACE );
+    }
 }
 
 void Planet::animate_texture()
@@ -242,6 +277,26 @@ void Planet::animate_texture()
     gluQuadricTexture( sphere, GL_TRUE );
     gluSphere( sphere, r, 64, 64 );
     glDisable(GL_TEXTURE_2D);
+    if(rings)
+    {
+        glDisable( GL_CULL_FACE);
+        glEnable(GL_TEXTURE_2D);
+        // Pixel alignment: each row is word aligned (aligned to a 4 byte boundary)
+        // Therefore, no need to call glPixelStore( GL_UNPACK_ALIGNMENT, ... );
+        glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+        glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+        glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+        glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+        gluBuild2DMipmaps( GL_TEXTURE_2D, GL_RGB, ring_cols, ring_rows, GL_RGB, GL_UNSIGNED_BYTE, ring_image );
+        
+        ring_obj = gluNewQuadric();
+        glColor3fv(color);
+        gluQuadricDrawStyle( ring_obj, GLU_FILL );
+        gluQuadricNormals( ring_obj, GLU_SMOOTH);
+        gluQuadricTexture(ring_obj, GL_TRUE );
+        gluCylinder( ring_obj,inner_r, outer_r,1,100,1000); 
+        glEnable( GL_CULL_FACE );
+    }
 }
 
 
