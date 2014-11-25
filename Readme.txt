@@ -94,6 +94,8 @@ Outstanding Bugs
    up or be barely function for moving the camera if this happens. If it zooms into a planet 
    it is impossible to get unstuck once locked at the origin of the planet, and the same with the zoom out to infinity.
 
+ - The rotational velocity of the planets just doesn't look right, even though we checked out math a few times.
+
 Other Notes:
 Planet_info.inf is our information file that stores all the values needed to create a planet object. 
 The first line in the file corresponds the number of Planets that are to be drawn with following lines being the actual information:
