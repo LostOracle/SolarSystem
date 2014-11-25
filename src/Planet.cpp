@@ -33,9 +33,9 @@ Planet::Planet( Planet_Info &info, Planet* ptr = NULL  ):r(info.r), orbital_r(in
     allocated_moons = 0;
     parent = ptr;
 
-    ambient[0] = .3;
-    ambient[1] = .3;
-    ambient[2] = .3;
+    ambient[0] = .5;
+    ambient[1] = .5;
+    ambient[2] = .5;
     ambient[3] = 1;
     diffuse[0]= 0.6;
     diffuse[1]= 0.6;
@@ -49,7 +49,7 @@ Planet::Planet( Planet_Info &info, Planet* ptr = NULL  ):r(info.r), orbital_r(in
     {
         emissivity[0] = 1;
         emissivity[1] = 1;
-        emissivity[2] = 1;
+        emissivity[2] = 0;
         emissivity[3] = 1;
     }
     else
