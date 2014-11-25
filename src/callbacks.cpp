@@ -119,13 +119,22 @@ void keyboard( unsigned char key, int x, int y )
     y = ScreenHeight - y;
     switch(key)
     {
+    case ' ':
+        move_up(TRANSLATE_COEFF);
+        break;
+    case 'c':
+    case 'C':
+    case 'x':
+    case 'X':
+        move_up(-TRANSLATE_COEFF);
+        break;
     case 'a':
     case 'A':
         move_left(TRANSLATE_COEFF);
         break;
     case 'w':
     case 'W':
-        move_up(TRANSLATE_COEFF);
+        move_forward(TRANSLATE_COEFF);
         break;
     case 'd':
     case 'D':
@@ -133,7 +142,7 @@ void keyboard( unsigned char key, int x, int y )
         break;
     case 's':
     case 'S':
-        move_up(-TRANSLATE_COEFF);
+        move_forward(-TRANSLATE_COEFF);
         break;
     case 'e':
     case 'E':
