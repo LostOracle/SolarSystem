@@ -7,10 +7,79 @@ Authors:
 Ian Carlson, Christopher Smith
 
 Program Description:
+    This program implements a simulation of the solar system. Because the solar system has
+bafflingly huge proportions, we did make the following modifications to reality
+in order to provide a more interesting simulation.
+
+-
+-
+-
 
 Instructions:
+    The program initially starts out with a view point locked onto the sun.
+    The user can right click to bring up a menu to Choose: 
+ 
+        Display Method
+            Wireframe
+            Flat Shading
+            Smooth Shading
+            Textures
+        Jump To (Locks camera to Planet)
+            Any celestial body that is listed
+        Unlock Camera
+        Increment timestep
+        Decrement timestep
+        Increase Resolution
+        Decrement Resolution
+        Pause/Resume Simulation
+        Single Step
+        Help (Brings up this Readme)
+        
+    Always available:
+        +,=      - Increases time_step
+        -        - Decreases time_step
+        P,p      - (Un)pauses simulation
+        T,t      - Single time_step while paused simulation
+        *        - Increases planet resolution
+        /        - Decrease  planet resolution        
 
+    Not locked on a planet:
+        SpaceBar - Moves the camera up    
+        C,c,X,x  - Moves the camera down
+        A,a      - Moves the camera left
+        D,d      - Moves the camera right
+        W,w      - Moves the camera forward
+        S,s      - Moves the camera backward
+        E,e      - Rotates the camera clockwise
+        Q,q      - Rotates teh camera counter clockwise
+
+    Locked on a planet:
+        Mouse Wheel Zoom
+        Click and drag to rotate around planet
+        
 Features
+    Required Features
+        Different Color For Each Planet
+        Text Labels
+        Orbital Track
+        User can change wireframe resolution
+            animation speed
+        Single Step Mode
+        User can change between
+            wireframe
+            flat/smooth shading
+            textures
+        Circular Orbits
+        Constant Trajectories
+        Keyboard/Mouse Control
+        Popup Menu
+        Help (pops up this readme in linux)
+
+    Extra Features
+        Jump to Planet
+        Track Planet In Motion
+        Europa
+        Easily reconfigurable planets without recompiling
 
 Outstanding Bugs
  - Jupiters moon Europa incorrectly displays its texture map with a green hue to it. 
