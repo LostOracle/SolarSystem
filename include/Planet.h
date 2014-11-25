@@ -46,7 +46,7 @@ class Planet
             Planet* add_moon(Planet_Info &info);
             long double get_radius();
     private:
-            static double wire_res;:
+            static double wire_res;
             int texture_rows;
             int texture_cols;
             unsigned char * image;
