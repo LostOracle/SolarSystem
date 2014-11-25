@@ -1,3 +1,9 @@
+/************************************************************************
+* File: CameraFunctions.h
+* Author: Chris Smith, Ian Carlson
+* Description: Functions for handling camera movement
+* Date: 20 Nov 2014
+************************************************************************/
 #ifndef _CAMERA_FUNCTIONS_H_
 #define _CAMERA_FUNCTIONS_H_
 

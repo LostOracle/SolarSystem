@@ -1,3 +1,9 @@
+/************************************************************************
+* File: Camera_Structs.h
+* Author: Chris Smith, Ian Carlson
+* Description: Camera position and speed structs
+* Date: 20 Nov 2014
+************************************************************************/
 #ifndef CAMERA_STRUCTS_H_
 #define CAMERA_STRUCTS_H_
 

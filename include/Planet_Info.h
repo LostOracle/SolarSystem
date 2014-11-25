@@ -1,3 +1,10 @@
+/************************************************************************
+* File: Planet_Info.h
+* Author: Chris Smith, Ian Carlson
+* Description: Planet_Info struct that is passed to planet class that 
+* stores all planet values 
+* Date: 20 Nov 2014
+************************************************************************/
 #ifndef PLANET_INFO_H
 #define PLANET_INFO_H
 

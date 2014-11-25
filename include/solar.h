@@ -1,3 +1,10 @@
+/************************************************************************
+* File: solar.h
+* Author: Chris Smith, Ian Carlson
+* Description: Drawing functions and main function that initiates all
+* drawing objects.  
+* Date: 20 Nov 2014
+************************************************************************/
 #ifndef _SOLAR_H_
 #define _SOLAR_H_
 

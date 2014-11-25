@@ -1,3 +1,10 @@
+/************************************************************************
+* File: Planet.h
+* Author: Chris Smith, Ian Carlson
+* Description: Planet class and functions used to read in bmp files
+* that Dr. Weiss wrote.
+* Date: 20 Nov 2014
+************************************************************************/
 #ifndef PLANET_H
 #define PLANET_H
 #include "Planet_Info.h"
@@ -5,12 +12,14 @@
 #include <GL/freeglut.h>
 #include <math.h>
 #include <stdio.h>
+//FUNCTION PROTOTYPES THAT DR. WEISS WROTE.
 bool LoadBmpFile( const char* filename, int &NumRows, int &NumCols, unsigned char* &ImagePtr );
 short readShort( FILE* infile );
 int readLong( FILE* infile );
 void skipChars( FILE* infile, int numChars );
 inline int GetNumBytesPerRow( int NumCols );
 
+//Planet Class
 class Planet
 {
 public:

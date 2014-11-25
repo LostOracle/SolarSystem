@@ -1,3 +1,9 @@
+/************************************************************************
+* File: callbacks.h
+* Author: Chris Smith, Ian Carlson
+* Description: OpenGL registered event handler callback functions
+* Date: 20 Nov 2014
+************************************************************************/
 #ifndef _CALLBACKS_H_
 #define _CALLBACKS_H_
 
