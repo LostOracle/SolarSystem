@@ -498,8 +498,8 @@ void OpenGLInit( void )
 
     // specify light source properties
     GLfloat light_ambient[] = { 0, 0, 0, 1.0 };       // ambient light
-    GLfloat light_diffuse[] = { 0.5, 0.5, 0.5, 1.0 };       // diffuse light
-    GLfloat light_specular[] = { 0.2, 0.2, 0.2, 1.0 };      // highlights
+    GLfloat light_diffuse[] = { 1, 1, 1, 1.0 };       // diffuse light
+    GLfloat light_specular[] = { 1, 1, 1, 1.0 };      // highlights
    
     glEnable(GL_LIGHT0);
     glLightfv( GL_LIGHT0, GL_AMBIENT, light_ambient );
@@ -519,12 +519,9 @@ void OpenGLInit( void )
     glutSpecialFunc(special_keyboard);
     glutMouseFunc( click );
     glutMotionFunc( drag );
-    glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
-    // Set up the callback function for resizing windows
     glutReshapeFunc( ResizeWindow );
-
-    // Callback for graphics image redrawing
     glutDisplayFunc( Animate );
+    glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
     CreateMenus();
 }
 
@@ -556,9 +553,6 @@ int main( int argc, char** argv )
     init_camera();
     glutInit( &argc, argv );
     glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
-
-    
-
 
     // Initialize OpenGL.
     OpenGLInit();
